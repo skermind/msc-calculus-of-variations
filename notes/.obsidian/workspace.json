@@ -14,12 +14,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
-                "mode": "preview",
-                "source": true
+                "file": "TheDirectMethod/3.1 Introduction.md",
+                "mode": "source",
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "3.4. Euler-Lagrange Equations"
+              "title": "3.1 Introduction"
             }
           },
           {
@@ -103,12 +103,14 @@
             "id": "ee52549999054d11",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf"
+                "file": "Plan/Personal Motivations and Inital Plan.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "FilipRindler_IntroToModernCoV_LectureNotes"
+              "icon": "lucide-file",
+              "title": "Personal Motivations and Inital Plan"
             }
           },
           {
@@ -300,26 +302,26 @@
   },
   "active": "ee52549999054d11",
   "lastOpenFiles": [
-    "ReadingList/Rindler/Rindler Note.md",
-    "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
     "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
+    "TheDirectMethod/TheDirectMethod.md",
+    "Nomenclature.md",
+    "Untitled.base",
+    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
+    "TheDirectMethod/3.1 Introduction.md",
     "TheDirectMethod/3.3 A General Existence Theorem.md",
     "TheDirectMethod/3.2 The Model Case.md",
+    "Pasted image 20260620122930.png",
+    "Pasted image 20260620123117.png",
+    "ReadingList/Rindler/Rindler Note.md",
+    "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
     "Preliminaries/1.4 Sobolev Spaces.md",
-    "TheDirectMethod/3.1 Introduction.md",
     "Preliminaries/1.3 Lp spaces.md",
-    "TheDirectMethod/TheDirectMethod.md",
     "Preliminaries/1.2 Continuous and Hölder continuous functions.md",
     "ReadingList/Dacorogna/Dacorogna Note.md",
     "Preliminaries/1.5 Convex Analysis.md",
-    "Nomenclature.md",
-    "Pasted image 20260620122930.png",
-    "Pasted image 20260620123117.png",
-    "Untitled.base",
     "Preliminaries/Preliminaries.md",
     "TheDirectMethod",
     "2026-06-24.md",
-    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
     "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
     "Preliminaries",
     "Plan/Personal Motivations and Inital Plan.md",
