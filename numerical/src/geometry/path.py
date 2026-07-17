@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 class Path:
@@ -49,3 +50,19 @@ class Path:
         )
 
         return np.sum(lengths)
+
+    def to_dataframe(self):
+        """
+        Convert discrete path points into a pandas DataFrame.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Table containing the ordered coordinates of the path.
+        """
+
+        return pd.DataFrame({
+            "point": range(len(self.points)),
+            "x": self.points[:, 0],
+            "y": self.points[:, 1]
+        })

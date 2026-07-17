@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 
 class Terrain:
@@ -107,59 +108,86 @@ class Terrain:
         """
 
         return self.grid[i, j]
-    
-    def terrain_cost(path, terrain):
+
+    def add_hill(self, centre, peak_cost=0.8, radius=20):
         """
-        Calculate the terrain cost of a discrete path.
-        The continuous variational problem is defined by the functional:
-            J(gamma) = ∫_gamma c(x,y) ds
-        where:
-            c(x,y) : Ω → [0,1]
-        is the terrain cost field and ds represents an infinitesimal
-        element of path length.
-        This function approximates the integral numerically using a
-        discrete path:
-            gamma_h = {p_0, p_1, ..., p_N}
-        giving:
-            J(gamma_h) ≈ Σ c(p_i)|p_(i+1)-p_i|
+        Add a smooth circular hill to the terrain cost field.
+
+        The hill increases the terrain cost smoothly from the background
+        cost at the edge of the radius to the peak cost at the centre.
+
         Parameters
         ----------
-        path : Path
-            A discrete approximation of the continuous curve gamma.
-            The path should contain an ordered sequence of points:
-                [(x_0,y_0), (x_1,y_1), ..., (x_N,y_N)]
-            where the first and last points satisfy the boundary
-            conditions.
-        terrain : Terrain
-            A terrain cost field used to evaluate c(x,y).
-        Returns
-        -------
-        float
-            Total accumulated terrain cost along the path.
+        centre : tuple
+            Coordinates of the hill centre as (x, y).
+
+        peak_cost : float
+            Maximum cost at the centre of the hill.
+
+        radius : float
+            Radius of influence of the hill in physical coordinates.
+
         Notes
         -----
-        The current implementation assumes that:
-        - Terrain cost is independent of direction.
-        - The path cost increases with both terrain difficulty
-        and path length.
-        - Costs are normalised to the interval [0,1].
+        The terrain cost is updated using a Gaussian profile:
 
+            c(x,y) = background + (peak - background) * exp(-d^2/(2*sigma^2))
+
+        where d is the distance from the hill centre.
         """
 
-        total_cost = 0.0
-        points = path.points
-        for i in range(len(points) - 1):
-            p1 = np.array(points[i])
-            p2 = np.array(points[i + 1])
+        x_centre, y_centre = centre
 
-            # Length of the current path segment
-            segment_length = np.linalg.norm(p2 - p1)
+        # Convert physical coordinates into grid coordinates
+        x = np.linspace(0, self.width, self.resolution)
+        y = np.linspace(0, self.height, self.resolution)
 
-            # Terrain cost at current point
-            point_cost = terrain.get_cost(
-                i,
-                i + 1
-            )
-            total_cost += point_cost * segment_length
+        X, Y = np.meshgrid(x, y)
 
-        return total_cost
+        distance_squared = (
+            (X - x_centre) ** 2
+            + (Y - y_centre) ** 2
+        )
+
+        # Choose sigma so the hill influence is approximately radius sized
+        sigma = radius / 3
+
+        hill = (peak_cost - self.cost) * np.exp(
+            -distance_squared / (2 * sigma ** 2)
+        )
+
+        # Only add the hill inside the chosen radius
+        hill[distance_squared > radius ** 2] = 0
+
+        # Combine with existing terrain without reducing existing costs
+        self.grid = np.maximum(
+            self.grid,
+            self.cost + hill
+        )
+    
+    def to_dataframe(self):
+        """
+        Convert terrain cost grid into a pandas DataFrame.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Two-dimensional table containing terrain costs.
+        """
+
+        return pd.DataFrame(self.grid)
+    
+    def get_cost_at_coordinate(self, x, y):
+        """
+        Return terrain cost at physical coordinate (x,y).
+        """
+
+        i = int(
+            y / self.height * (self.resolution - 1)
+        )
+
+        j = int(
+            x / self.width * (self.resolution - 1)
+        )
+
+        return self.get_cost(i, j)

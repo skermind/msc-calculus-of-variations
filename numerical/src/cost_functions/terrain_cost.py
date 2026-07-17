@@ -3,28 +3,9 @@ import numpy as np
 
 def terrain_cost(path, terrain):
     """
-    Calculate the terrain cost of a discrete path.
-
-    Approximates:
-
-        J(gamma) = ∫_gamma c(x,y) ds
-
-    using:
-
-        J(gamma_h) ≈ Σ c(p_i)|p_(i+1)-p_i|
-
-    Parameters
-    ----------
-    path : Path
-        Discrete path.
-
-    terrain : Terrain
-        Terrain cost field.
-
-    Returns
-    -------
-    float
-        Total path cost.
+    Approximate:
+        J(gamma)=∫_gamma c(x,y) ds
+    using a discrete path.
     """
 
     total_cost = 0.0
@@ -36,13 +17,15 @@ def terrain_cost(path, terrain):
         p1 = points[i]
         p2 = points[i+1]
 
-        distance = np.linalg.norm(
+        segment_length = np.linalg.norm(
             p2-p1
         )
 
-        # For now use uniform terrain
-        cost = terrain.cost
+        midpoint = (p1+p2)/2
 
-        total_cost += cost * distance
-
+        cost = terrain.get_cost_at_coordinate(
+            midpoint[0],
+            midpoint[1]
+        )
+        total_cost += cost * segment_length
     return total_cost

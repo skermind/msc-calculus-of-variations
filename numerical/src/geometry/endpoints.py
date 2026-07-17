@@ -1,3 +1,5 @@
+import pandas as pd
+
 class Endpoints:
     """
     Defines fixed boundary conditions for a variational path problem.
@@ -27,3 +29,28 @@ class Endpoints:
     def __init__(self, start, end):
         self.start = start
         self.end = end
+    
+    def to_dataframe(self):
+        """
+        Convert boundary points into a pandas DataFrame.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Table containing endpoint coordinates.
+        """
+
+        return pd.DataFrame({
+            "point": [
+                "start",
+                "end"
+            ],
+            "x": [
+                self.start[0],
+                self.end[0]
+            ],
+            "y": [
+                self.start[1],
+                self.end[1]
+            ]
+        })
