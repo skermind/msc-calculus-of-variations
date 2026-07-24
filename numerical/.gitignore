@@ -8,8 +8,5 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Generated outputs
-outputs/
-
 # Data
 data/raw/
