@@ -62,8 +62,19 @@ def terrain_curvature_cost(path):
 
     return total_cost
 
-def total_cost(path, terrain, lam):
+
+def terrain_length_cost(path):
+
+    total_cost = 0.0
+    points = path.points
+
+    for i in range(len(points)-1):
+        total_cost += np.linalg.norm(points[i+1] - points[i])
+    return total_cost
+
+def total_cost(path, terrain, terrain_weight, lamda, mu):
     return (
-        terrain_cost(path, terrain)
-        + lam * terrain_curvature_cost(path)
+        (terrain_weight * terrain_cost(path, terrain))
+        + (lamda * terrain_curvature_cost(path))
+        + (mu * terrain_length_cost(path))
     )

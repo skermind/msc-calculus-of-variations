@@ -150,4 +150,21 @@ def segment_shift_move(path, terrain, sigma, alpha: float, segment_length: int =
         candidate.points[idx][0] += displacement[0]
         candidate.points[idx][1] += displacement[1]
 
+        candidate.points[idx][0] = np.clip(
+            candidate.points[idx][0],
+            0,
+            terrain.width - 1
+        )
+
+        candidate.points[idx][1] = np.clip(
+            candidate.points[idx][1],
+            0,
+            terrain.height - 1
+        )
+
+    # Reject moves that violate monotonic x-ordering
+    x_values = candidate.points[:, 0]
+    if not np.all(np.diff(x_values) > 0):
+        return path
+
     return candidate

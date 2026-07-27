@@ -8,6 +8,7 @@ decreases as the temperature cools.
 
 import numpy as np
 import pandas as pd
+import copy
 
 from optimisation.moves import shift_move, segment_shift_move
 from cost_functions.terrain_cost import terrain_cost, terrain_curvature_cost, total_cost
@@ -251,7 +252,9 @@ def simulated_segment_annealing_curvature(
     sigma=1.0,
     alpha=1.0,
     segment_length=5,
-    lam=1
+    terrain_weight=1,
+    lam=1,
+    mu=1
 ):
     """
     Perform simulated annealing to minimise terrain path cost.
@@ -289,11 +292,17 @@ def simulated_segment_annealing_curvature(
     """
 
     # Current solution
-    current_path = initial_path
-    current_cost = terrain_cost(current_path, terrain)
+    current_path = copy.deepcopy(initial_path)
+    current_cost = total_cost(
+                        current_path,
+                        terrain,
+                        terrain_weight,
+                        lam,
+                        mu
+                    )
 
     # Best solution found
-    best_path = current_path
+    best_path = copy.deepcopy(current_path)
     best_cost = current_cost
 
     temperature = initial_temperature
@@ -310,32 +319,36 @@ def simulated_segment_annealing_curvature(
             alpha,
             segment_length
         )
+        
         candidate_cost = total_cost(
             candidate_path,
             terrain,
-            lam
+            terrain_weight,
+            lam,
+            mu
         )
 
-        # check ordering
-        if not valid_path_order(candidate_path):
-            accept = False
+        accept = False
 
-        # Cost difference
-        delta = candidate_cost - current_cost
-        # Accept better solutions
-        if delta < 0:
-            accept = True
-        # Accept worse solutions probabilistically
-        else:
+        # Only accept paths satisfying the ordering constraint
+        if valid_path_order(candidate_path):
 
-            probability = np.exp(
-                -delta / temperature
-            )
-            accept = np.random.random() < probability
+            delta = candidate_cost - current_cost
+
+            # Accept better solutions
+            if delta < 0:
+                accept = True
+
+            # Accept worse solutions probabilistically
+            else:
+                probability = np.exp(
+                    -delta / temperature
+                )
+                accept = np.random.random() < probability
 
 
         if accept:
-            current_path = candidate_path
+            current_path = copy.deepcopy(candidate_path)
             current_cost = candidate_cost
 
             # store accepted path
@@ -344,7 +357,7 @@ def simulated_segment_annealing_curvature(
 
         # Update best solution
         if current_cost < best_cost:
-            best_path = current_path
+            best_path = copy.deepcopy(current_path)
             best_cost = current_cost
 
 
