@@ -11,7 +11,7 @@ import pandas as pd
 import copy
 
 from optimisation.moves import shift_move, segment_shift_move
-from cost_functions.terrain_cost import terrain_cost, terrain_curvature_cost, total_cost
+from cost_functions.terrain_cost import terrain_cost, terrain_curvature_cost, total_cost, terrain_length_cost
 from tests.constraints import valid_path_order
 
 def simulated_annealing(
@@ -290,6 +290,11 @@ def simulated_segment_annealing_curvature(
     history : list
         Cost history during optimisation.
     """
+    print("=== Annealing Parameters ===")
+    print(f"Terrain weight (w_c): {terrain_weight}")
+    print(f"Curvature weight (lambda): {lam}")
+    print(f"Length weight (mu): {mu}")
+    print("============================")
 
     # Current solution
     current_path = copy.deepcopy(initial_path)
@@ -300,6 +305,8 @@ def simulated_segment_annealing_curvature(
                         lam,
                         mu
                     )
+
+    print(f"Initial cost: {current_cost}")
 
     # Best solution found
     best_path = copy.deepcopy(current_path)
@@ -329,6 +336,27 @@ def simulated_segment_annealing_curvature(
         )
 
         accept = False
+
+        if i < 20:
+            print("\nIteration:", i)
+
+            print("Current cost:", current_cost)
+            print("Candidate cost:", candidate_cost)
+            print("Delta:", candidate_cost - current_cost)
+
+            print("Candidate components:")
+            print(
+                "Terrain:",
+                terrain_cost(candidate_path, terrain)
+            )
+            print(
+                "Curvature:",
+                terrain_curvature_cost(candidate_path)
+            )
+            print(
+                "Length:",
+                terrain_length_cost(candidate_path)
+            )
 
         # Only accept paths satisfying the ordering constraint
         if valid_path_order(candidate_path):
