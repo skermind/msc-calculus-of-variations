@@ -55,3 +55,9 @@ def valid_path_terrain(path, terrain, samples=20):
                 return False
 
     return True
+
+def geometric_guard(path, base_step, max_seg_mult=3.0, max_dy_mult=2.5):
+    d = np.diff(path.points, axis=0)
+    seg_len = np.linalg.norm(d, axis=1)
+    dy = np.abs(d[:, 1])
+    return (seg_len.max() <= max_seg_mult * base_step) and (dy.max() <= max_dy_mult * base_step)
