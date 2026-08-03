@@ -12,7 +12,7 @@ import copy
 
 from optimisation.moves import shift_move, segment_shift_move
 from cost_functions.terrain_cost import terrain_cost, terrain_curvature_cost, total_cost, terrain_length_cost
-from tests.constraints import valid_path_order
+from tests.constraints import valid_path_order, valid_path_terrain
 
 def simulated_annealing(
     initial_path,
@@ -358,8 +358,8 @@ def simulated_segment_annealing_curvature(
                 terrain_length_cost(candidate_path)
             )
 
-        # Only accept paths satisfying the ordering constraint
-        if valid_path_order(candidate_path):
+        # Only accept paths satisfying the ordering constraint and impassability
+        if valid_path_order(candidate_path) & valid_path_terrain(candidate_path, terrain):
 
             delta = candidate_cost - current_cost
 

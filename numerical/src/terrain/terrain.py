@@ -89,6 +89,11 @@ class Terrain:
             cost
         )
 
+        self.impassable = np.zeros(
+            (resolution, resolution),
+            dtype=bool
+        )
+
     def get_cost(self, i, j):
         """
         Return the terrain cost at a given grid location.
@@ -164,6 +169,51 @@ class Terrain:
             self.grid,
             self.cost + hill
         )
+    
+    def add_impassable_square(self, bottom_left, top_right):
+        """
+        Add a square region of impassable terrain.
+
+        Parameters
+        ----------
+        bottom_left : tuple
+            Lower-left coordinate of the square as (x, y).
+
+        top_right : tuple
+            Upper-right coordinate of the square as (x, y).
+        """
+
+        x_min, y_min = bottom_left
+        x_max, y_max = top_right
+
+        x = np.linspace(0, self.width, self.resolution)
+        y = np.linspace(0, self.height, self.resolution)
+
+        X, Y = np.meshgrid(x, y)
+
+        mask = (
+            (X >= x_min)
+            & (X <= x_max)
+            & (Y >= y_min)
+            & (Y <= y_max)
+        )
+
+        self.impassable[mask] = True
+
+    def is_impassable(self, x, y):
+        """
+        Return whether physical coordinate (x,y) lies in an impassable region.
+        """
+
+        i = int(
+            y / self.height * (self.resolution - 1)
+        )
+
+        j = int(
+            x / self.width * (self.resolution - 1)
+        )
+
+        return self.impassable[i, j]
     
     def to_dataframe(self):
         """
