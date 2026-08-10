@@ -1,0 +1,65 @@
+In this dissertation, I explore applications of the Direct Method of the Calculus of Variations. Initially, the necessary background and results from functional analysis are introduced in order to establish the mathematical foundation required for the Direct Method. The necessary framework will be developed following Dacorogna’s \textit{Introduction to the Calculus of Variations} \cite{dacorogna}. The Classical Method, based on the Euler–Lagrange equation, is then introduced and applied to simpler variational problems. Building on these results, the Direct Method is explored, forming the principal focus of the dissertation. Finally, the ideas from the Calculus of Variations are applied to a path-planning problem, for which a stochastic numerical solver based on Simulated Annealing is developed to approximate a shortest path between two points. This provides a computational application of the theoretical results developed throughout the dissertation.
+
+\section{Background}
+
+\begin{quote}
+\textit{The calculus of variations is one of the classical branches of
+mathematics. It was Euler who, looking at the work of Lagrange, gave the
+present name, not really self explanatory, to this field of mathematics.}\cite[p.~1]{dacorogna}
+\end{quote}
+
+The problems typically associated with the calculus of variations are ancient in comparison with many of the problems considered in modern mathematics, although their formulations can be relatively simple to understand. At its core, the calculus of variations concerns optimisation problems in which one seeks to determine an optimal function with respect to an objective functional. Simple examples include finding the shortest path between two points in a plane or determining the maximum area enclosed by a fixed length of fencing.
+
+Although the formulation of such problems may be relatively straightforward, the methods required to obtain their solutions can be considerably more involved. The development of a systematic framework for the calculus of variations therefore allows more abstract and challenging problems to be considered. One such example is the problem of determining the optimal course of a sailing boat travelling against the wind, as discussed in Rindler’s lecture notes, \textit{Introduction to the Modern Calculus of Variations}.\cite{rindler}
+
+As in many works on the Calculus of Variations, I introduce the subject through Dido’s problem. The semi-historical Phoenician princess, and later and most famously the founder and queen of Carthage, is said to have encountered a variational problem within the founding myth of her city. According to the legend, Dido was offered as much land as could be enclosed by the hide of a bull. She subsequently cut the hide into thin strips and used them to enclose a large area of land, which became the site of Carthage. In doing so, Dido is said to have encountered what is now known as the \textit{isoperimetric problem}: \textit{Find, among all curves of given length, the one which encloses the maximal area} \cite{bandle}.
+
+It was this problem that inspired Euler to seek a general method for solving problems in the Calculus of Variations, laying some of the foundations of the subject. Eleven years after Euler’s work, the nineteen-year-old Lagrange developed a more general method, which impressed Euler \cite{bandle}. The Classical Method of the Calculus of Variations is therefore closely associated with the work of these two mathematical giants. 
+
+Following the development of the Classical Method, what is now known as the Direct Method was conceived through the work of mathematicians including Hilbert, Lebesgue, and Tonelli. Among the problems that motivated this transition was the Dirichlet integral: a problem of multiple integrals \cite{dacorogna}. Hilbert played an important role in the transition of the Calculus of Variations into the modern era, particularly through the 19th, 20th, and 23rd problems that he presented at the International Congress of Mathematicians in Paris in 1900 \cite{rindler}.
+
+This brings us to the present day, where the field of the Calculus of Variations is both broad and active. Mathematicians continue to develop the theory and apply it to an increasingly diverse range of problems, leaving their mark on the subject across areas of both pure and applied mathematics.
+
+\clearpage
+
+\section{Model problem}
+
+We now describe some examples of variational problems in more detail. 
+Throughout this dissertation, we focus primarily on minimisation problems. 
+A general model problem can be written in the form
+\begin{equation}
+\inf \left\{ I(u) = \int_\Omega f(x,u,\nabla u(x)) \, dx : u \in X \right\} = m,
+\tag{P}
+\label{eq:General_P}
+\end{equation}
+where the notation follows the formulation given by Dacorogna \cite[p.~3]{dacorogna}.
+
+Here, the various components of the problem are understood as follows:
+\begin{itemize}
+    \item $\Omega \subset \mathbb{R}^n$, $n \geq 1$, is a bounded open set, with a point in $\Omega$ denoted by $x = (x_1,\dots,x_n)$;
+
+    \item $u : \Omega \rightarrow \mathbb{R}^N$, $N \geq 1$, is the function being minimised, where
+    \[
+        u = (u^1,\dots,u^N)
+    \]
+    and
+    \[
+        \nabla u =
+        \left(
+        \frac{\partial u^j}{\partial x_i}
+        \right)^{1\leq j\leq N}_{1\leq i\leq n}
+        \in \mathbb{R}^{N\times n};
+    \]
+
+    \item $f : \overline{\Omega} \times \mathbb{R}^N
+    \times \mathbb{R}^{N\times n} \rightarrow \mathbb{R}$ is the integrand, assumed to be continuous;
+
+    \item $X$ denotes the space of admissible functions. For example, one may take
+    $X = \{u \in C^1(\overline{\Omega}) : u = u_0 \text{ on } \partial\Omega\}$.
+\end{itemize}
+
+We are concerned with finding a \textit{minimiser} $\overline{u} \in X$, 
+that is, a function satisfying
+\[
+    I(\overline{u}) \leq I(u), \qquad \forall u \in X.
+\]
