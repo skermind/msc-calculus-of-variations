@@ -1,6 +1,8 @@
 from copy import deepcopy
+import copy
 import random
 import numpy as np
+from cost_functions.terrain_cost import terrain_curvature_cost, terrain_length_cost
 
 def _normalised_selection_probabilities(scores: np.ndarray, alpha: float) -> np.ndarray:
     """Convert non-negative scores into a stable probability vector."""
@@ -291,107 +293,273 @@ def segment_shift_move(path, terrain, sigma, alpha: float, segment_length: int =
 
     return candidate
 
+def path_intersects_impassable(path, terrain, samples_per_segment=20):
 
-def segment_shift_move_impassible(path, terrain, sigma, alpha: float, segment_length: int = 5):
     """
-    Randomly perturb a contiguous segment of interior waypoints that
-    intersects impassable terrain.
 
-    A copy of the supplied path is created. Each candidate segment is scored
-    according to how many sampled points along its constituent line segments
-    intersect impassable terrain. The segment with the highest score is then
-    selected (breaking ties uniformly at random) and displaced by the same
-    two-dimensional Gaussian random vector. The start and end points remain
-    fixed so that the boundary conditions are preserved.
+    Check whether any part of the polyline intersects impassable terrain.
 
-    This move is intended for constructing an initial feasible path rather
-    than optimising the objective functional.
+    This checks the line between waypoints rather than just the waypoints
 
+    themselves.
+
+    """
+
+    points = path.points
+
+    for i in range(len(points) - 1):
+
+        p1 = points[i]
+
+        p2 = points[i + 1]
+
+        for t in np.linspace(0.0, 1.0, samples_per_segment):
+
+            x = p1[0] + t * (p2[0] - p1[0])
+
+            y = p1[1] + t * (p2[1] - p1[1])
+
+            if terrain.is_impassable(x, y):
+
+                return True
+
+    return False
+
+def smooth_obstacle_shift(
+    path,
+    terrain,
+    window=8,
+    amplitude_step=1.0,
+    max_amplitude=30.0,
+    samples_per_segment=20
+):
+    """
+    Construct a smooth local detour around impassable terrain.
+    The path is locally displaced in the y-direction using a sinusoidal
+    bump. The displacement is zero at the edges of the affected region
+    and reaches its maximum near the centre.
+    Both upward and downward detours are tested. The smallest feasible
+    displacement is preferred, with curvature used to break ties.
     Parameters
     ----------
     path : Path
-        Current candidate path.
-
+        Current path.
     terrain : Terrain
-        Terrain object providing the impassable terrain mask.
-
-    sigma : float
-        Standard deviation of the Gaussian perturbation.
-
-    alpha : float
-        Controls the strength of the bias towards segments intersecting
-        impassable terrain.
-
-    segment_length : int
-        Number of neighbouring interior waypoints to move.
-
+        Terrain object containing the impassable mask.
+    window : int
+        Number of waypoints before and after the obstacle affected region.
+    amplitude_step : float
+        Amount by which the displacement amplitude is increased.
+    max_amplitude : float
+        Maximum displacement that will be attempted.
+    samples_per_segment : int
+        Number of samples used when checking line/terrain intersections.
     Returns
     -------
-    Path
-        A new candidate path with a shifted segment.
+    Path or None
+        Smooth feasible path, or None if no feasible path was found.
     """
-    candidate = deepcopy(path)
+    original = copy.deepcopy(path)
+    points = original.points
+    n_points = len(points)
+    # ---------------------------------------------------------
+    # Find path segments that intersect impassable terrain
+    # ---------------------------------------------------------
+    blocked_segments = []
 
-    n_points = len(candidate.points)
+    for i in range(n_points - 1):
+        p1 = points[i]
+        p2 = points[i + 1]
+        intersects = False
+        for t in np.linspace(0.0, 1.0, samples_per_segment):
 
-    if n_points < segment_length + 2:
-        return candidate
+            x = p1[0] + t * (p2[0] - p1[0])
+            y = p1[1] + t * (p2[1] - p1[1])
 
-    # Valid segment starting locations (avoid fixed boundary points)
-    possible_starts = np.arange(1, n_points - segment_length)
+            if terrain.is_impassable(x, y):
 
-    # Score each segment by how much of its polyline intersects impassable terrain
+                intersects = True
+                break
 
-    segment_scores = []
+        if intersects:
 
-    for start in possible_starts:
-        score = 0
+            blocked_segments.append(i)
 
-        for idx in range(start, min(start + segment_length, n_points - 1)):
+    # Nothing to fix
+    if not blocked_segments:
+        return original
+    # ---------------------------------------------------------
+    # Determine local region around obstacle
+    # ---------------------------------------------------------
 
-            p1 = candidate.points[idx]
-            p2 = candidate.points[idx + 1]
+    first_blocked = blocked_segments[0]
 
-            for t in np.linspace(0.0, 1.0, 20):
-                x = p1[0] + t * (p2[0] - p1[0])
-                y = p1[1] + t * (p2[1] - p1[1])
+    last_blocked = blocked_segments[-1]
 
-                if terrain.is_impassable(x, y):
-                    score += 1
+    start_idx = max(1, first_blocked - window)
 
-        segment_scores.append(score)
+    end_idx = min(n_points - 2, last_blocked + 1 + window)
 
-    segment_scores = np.array(segment_scores)
+    if end_idx <= start_idx:
 
-    max_score = segment_scores.max()
+        return None
 
-    if max_score == 0:
-        start_position = np.random.randint(len(possible_starts))
-    else:
-        worst_segments = np.where(segment_scores == max_score)[0]
-        start_position = np.random.choice(worst_segments)
+    # ---------------------------------------------------------
 
-    start_idx = possible_starts[start_position]
+    # Generate candidate detours
 
-    # Use y-dominant displacement to preserve monotonic x ordering.
-    displacement = np.array([
-        0.0,
-        np.random.normal(0.0, sigma)
-    ])
+    # ---------------------------------------------------------
 
-    if not _apply_smooth_segment_displacement(
-        candidate=candidate,
-        terrain=terrain,
-        start_idx=start_idx,
-        segment_length=segment_length,
-        sigma=sigma,
-        displacement=displacement
-    ):
-        return path
+    candidates = []
 
-    # Reject moves that violate monotonic x-ordering
-    x_values = candidate.points[:, 0]
-    if not np.all(np.diff(x_values) > 0):
-        return path
+    amplitudes = np.arange(
 
-    return candidate
+        amplitude_step,
+
+        max_amplitude + amplitude_step,
+
+        amplitude_step
+
+    )
+
+    for direction in (-1, 1):
+
+        for amplitude in amplitudes:
+
+            candidate = copy.deepcopy(original)
+
+            # ---------------------------------------------
+
+            # Smooth sinusoidal displacement
+
+            # ---------------------------------------------
+
+            region_length = end_idx - start_idx
+
+            for j, idx in enumerate(
+
+                range(start_idx, end_idx + 1)
+
+            ):
+
+                if region_length == 0:
+
+                    weight = 0.0
+
+                else:
+
+                    t = j / region_length
+
+                    weight = np.sin(np.pi * t)
+
+                candidate.points[idx, 1] += (
+
+                    direction
+
+                    * amplitude
+
+                    * weight
+
+                )
+
+            # ---------------------------------------------
+
+            # Check x ordering
+
+            # ---------------------------------------------
+
+            x_values = candidate.points[:, 0]
+
+            if not np.all(np.diff(x_values) > 0):
+
+                continue
+
+            # ---------------------------------------------
+
+            # Check obstacle avoidance
+
+            # ---------------------------------------------
+
+            if path_intersects_impassable(
+
+                candidate,
+
+                terrain,
+
+                samples_per_segment=samples_per_segment
+
+            ):
+
+                continue
+
+            # ---------------------------------------------
+
+            # Calculate smoothness
+
+            # ---------------------------------------------
+
+            curvature = terrain_curvature_cost(candidate)
+
+            length = terrain_length_cost(candidate)
+
+            candidates.append(
+
+                {
+
+                    "path": candidate,
+
+                    "amplitude": amplitude,
+
+                    "curvature": curvature,
+
+                    "length": length,
+
+                    "direction": direction
+
+                }
+
+            )
+
+            # We have found the smallest feasible amplitude
+
+            # for this direction, so move to the other direction.
+
+            break
+
+    # ---------------------------------------------------------
+
+    # No feasible detour
+
+    # ---------------------------------------------------------
+
+    if not candidates:
+
+        return None
+
+    # ---------------------------------------------------------
+
+    # Choose smoothest candidate
+
+    #
+
+    # Primary objective: curvature
+
+    # Secondary objective: path length
+
+    # ---------------------------------------------------------
+
+    candidates.sort(
+
+        key=lambda c: (
+
+            c["curvature"],
+
+            c["length"]
+
+        )
+
+    )
+
+    best = candidates[0]
+
+    return best["path"]
