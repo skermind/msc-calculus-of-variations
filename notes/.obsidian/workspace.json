@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Preliminaries/1.5 Convex Analysis.md",
+                "file": "Word Count Tracker.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "1.5 Convex Analysis"
+              "title": "Word Count Tracker"
             }
           }
         ]
@@ -76,8 +76,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -189,10 +188,11 @@
   },
   "active": "d33eca35098b066e",
   "lastOpenFiles": [
+    "Word Count Tracker.md",
+    "Preliminaries/1.5 Convex Analysis.md",
     "Preliminaries/1.3 Lp spaces.md",
     "Preliminaries/1.2 Continuous and Hölder continuous functions.md",
     "Preliminaries/1.4 Sobolev Spaces.md",
-    "Preliminaries/1.5 Convex Analysis.md",
     "ReadingList/Dacorogna/Dacorogna Note.md",
     "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
     "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
