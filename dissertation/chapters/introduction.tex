@@ -1,12 +1,14 @@
-In this dissertation, I explore applications of the Direct Method of the Calculus of Variations. Initially, the necessary background and results from functional analysis are introduced in order to establish the mathematical foundation required for the Direct Method. The necessary framework will be developed following Dacorogna’s \textit{Introduction to the Calculus of Variations} \cite{dacorogna}. The Classical Method, based on the Euler–Lagrange equation, is then introduced and applied to simpler variational problems. Building on these results, the Direct Method is explored, forming the principal focus of the dissertation. Finally, the ideas from the Calculus of Variations are applied to a path-planning problem, for which a stochastic numerical solver based on Simulated Annealing is developed to approximate a shortest path between two points. This provides a computational application of the theoretical results developed throughout the dissertation.
-
-\section{Background}
-
 \begin{quote}
 \textit{The calculus of variations is one of the classical branches of
 mathematics. It was Euler who, looking at the work of Lagrange, gave the
 present name, not really self explanatory, to this field of mathematics.}\cite[p.~1]{dacorogna}
 \end{quote}
+
+In this dissertation, I explore applications of the Direct Method of the Calculus of Variations. Initially, the necessary background and results from functional analysis are introduced in order to establish the mathematical foundation required for the Direct Method. The necessary framework will be developed following Dacorogna’s \textit{Introduction to the Calculus of Variations} \cite{dacorogna}. The Classical Method, based on the Euler–Lagrange equation, is then introduced and applied to simpler variational problems. Building on these results, the Direct Method is explored, forming the principal focus of the dissertation. Finally, the ideas from the Calculus of Variations are applied to a path-planning problem, for which a stochastic numerical solver based on Simulated Annealing is developed to approximate a shortest path between two points. This provides a computational application of the theoretical results developed throughout the dissertation.
+
+{\color{red} Introduction should be longer and more detailed. At its current stage it looks like an abstract of a paper. We should write it at the end, after everything finishes so that we can tell in details what we have done. Don't worry about it now, leave it for the moment.}
+
+\section{Background}
 
 The problems typically associated with the calculus of variations are ancient in comparison with many of the problems considered in modern mathematics, although their formulations can be relatively simple to understand. At its core, the calculus of variations concerns optimisation problems in which one seeks to determine an optimal function with respect to an objective functional. Simple examples include finding the shortest path between two points in a plane or determining the maximum area enclosed by a fixed length of fencing.
 
@@ -20,13 +22,26 @@ Following the development of the Classical Method, what is now known as the Dire
 
 This brings us to the present day, where the field of the Calculus of Variations is both broad and active. Mathematicians continue to develop the theory and apply it to an increasingly diverse range of problems, leaving their mark on the subject across areas of both pure and applied mathematics.
 
+{\color{red} This sections looks very good. 
+
+\vspace{2cm}
+
+If I were you I would name the chapters as follows:\\
+1. Introduction \\
+2. Mathematical modelling\\
+3. Numerical methods\\
+4. Results\\
+5. Conclusion and future work.}
+
 \clearpage
 
-\section{Model problem}
+\section{Preliminaries}
 
-We now describe some examples of variational problems in more detail. 
-Throughout this dissertation, we focus primarily on minimisation problems. 
-A general model problem can be written in the form
+In this section, we introduce the foundational mathematics required for the study of the Calculus of Variations. The Classical Method leads to the Euler–Lagrange equation, which transforms a variational problem into an ordinary differential equation. Although the Classical Method is not the primary focus of this dissertation, an understanding of this approach provides useful motivation for the development of the Direct Method.
+
+The Direct Method relies on several results from Functional Analysis, alongside an understanding of $L^p$ and Sobolev spaces. Convexity is also an important tool in analysing variational problems and understanding the properties of their solutions. These concepts provide the mathematical framework required to establish the existence of minimisers using the Direct Method. Establishing existence before applying a numerical method is particularly useful, as it allows us to determine whether a variational problem admits a minimiser before attempting to approximate one computationally.
+
+We now formulate the general form of a Calculus of Variations problem. Throughout this dissertation, we focus primarily on minimisation problems. A general model problem can be written in the form
 \begin{equation}
 \inf \left\{ I(u) = \int_\Omega f(x,u,\nabla u(x)) \, dx : u \in X \right\} = m,
 \tag{P}
@@ -63,3 +78,135 @@ that is, a function satisfying
 \[
     I(\overline{u}) \leq I(u), \qquad \forall u \in X.
 \]
+
+All the mathematics we develop will be used with the goal of first proving the existence of minimisers and then searching for potential minimisers for these problems. 
+
+\subsection{The Classical Method}
+
+We begin with a brief overview of the Classical Method, including some examples, in order to establish the ideas that motivate the Direct Method. Following the formulation in Dacorogna \cite[p.~57]{dacorogna}, we consider the one-dimensional variational problem
+\begin{equation}
+\inf \left\{
+I(u): u \in C^1([a,b]),\ u(a)=\alpha,\ u(b)=\beta
+\right\},
+\tag{P}
+\label{eq:Classical_P}
+\end{equation}
+
+where $f \in C^2([a,b]\times\mathbb{R}\times\mathbb{R})$ and
+\[
+    I(u)=\int_a^b f(x,u,u'(x))\,dx.
+\]
+
+To motivate the Classical Method, we first recall the analogous minimisation problem in $\mathbb{R}^n$,
+\[
+\inf\{F(x):x\in X\subset\mathbb{R}^n\}.
+\]
+For a sufficiently smooth minimiser $\overline{x}$, a necessary condition is
+\[
+F'(\overline{x})=0.
+\]
+The second and higher derivatives of $F$ can then be used to investigate the nature of the critical point.
+
+This formulation is a special case of the general variational problem introduced previously. In contrast to the general formulation, the Classical Method considers a one-dimensional domain $[a,b]$ and scalar-valued functions $u:[a,b]\rightarrow\mathbb{R}$. Consequently, the gradient $\nabla u$ is replaced by the ordinary derivative $u'$. The admissible functions are also restricted to $C^1([a,b])$ and are subject to fixed endpoint conditions $u(a)=\alpha$ and $u(b)=\beta$. The endpoint conditions will henceforth be referred to as boundary conditions.
+
+To solve these problems we can derive the Euler–Lagrange equation that should satisfy any $C^2([a,b])$ minimiser, $\overline{u}$, of $\eqref{eq:Classical_P}$. The Euler–Lagrange equation is analogous to $F'(\overline{x}) = 0$ in $\mathbb{R}^n$. \cite{dacorogna}
+
+The following theorem provides a necessary condition for a sufficiently smooth minimiser of the problem \eqref{eq:Classical_P}. It is stated here in the form used throughout this dissertation; the result corresponds to Theorem 2.1 in Dacorogna \cite[Theorem 2.1, p.~59]{dacorogna}.
+
+\begin{theorem}[Euler--Lagrange equation]
+\label{thm:Euler-Lagrange}
+    Let $f \in C^2([a,b]\times\mathbb{R}\times\mathbb{R})$, $f = f(x,u,\xi)$, and 
+    \begin{equation}
+        \inf_{u\in X} \left\{
+        I(u) = \int_a^b f(x,u,u'(x))\,dx
+        \right\} = m
+    \tag{P}
+    \label{eq:E-L_P}
+    \end{equation}
+    where
+    \[
+    X = \{u \in C^1([a,b]) : u(a)=\alpha,\ u(b)=\beta\}.
+    \]
+\begin{enumerate}
+
+    \item[(i)] If \eqref{eq:E-L_P} admits a minimiser $\overline{u} \in X \cap C^2[(a,b)]$, then, 
+    \begin{equation}
+        \frac{d}{dx}[f_\xi(x,\overline{u}(x),\overline{u}'(x))] = f_u(x,\overline{u}(x),\overline{u}'(x))
+    \tag{E}
+    \label{eq:E-L_E}
+    \end{equation}
+    
+    \item[(ii)] If $\overline{u}$ satisfies \eqref{eq:E-L_E} and if $(u,\xi) \rightarrow f(x,u,\xi)$  is convex for every $x\in[a,b]$, then $\overline{u}$ is a minimiser of \eqref{eq:E-L_P}.
+
+    \item[(iii)] If $(u,\xi) \rightarrow f(x,u,\xi)$  is \textbf{strictly} convex for every $x\in[a,b]$, then the minimiser of \eqref{eq:E-L_P}, if it exists, is unique.
+\end{enumerate}
+
+\end{theorem}
+
+\begin{proof}
+
+\begin{enumerate}
+
+    \item[(i)] For every $h \in \mathbb{R}$ and every $v \in C^1[(a,b)]$ with $v(a) = v(b) = 0$ we have
+    \[
+    I(\overline{u}) \le I(\overline{u} +hv)
+    \]
+    By setting $\Phi(h) = I(\overline{u} +hv)$, we have that $\Phi \in C^1(\mathbb{R})$ and $\Phi(0) \le \Phi(h)$. We can deduce that $\Phi$ has a relative minimum at $h=0$. So therefore, 
+    \[
+    \Phi '(0) = \left. \frac{d}{dh}[I(\overline{u} +hv)] \right |_{h=0}=0
+    \]
+    Noting that
+    \[
+    \left. \frac{d\Phi}{dh}\right |_{h=0} = \left. \int_a^b \frac{df}{dh}\right |_{h=0} \, dx
+    \]
+    Differentiating $f(x,u,u')$ with respect to $h$, where $u=\overline{u} + hv$ and $u'=\overline{u}' + hv'$, gives
+    \begin{align*}
+        \frac{df}{dh} &= \frac{\partial f}{\partial x} \cancel{\frac{dx}{dh}} + \frac{\partial f}{\partial u}\frac{du}{dh} + \frac{\partial f}{\partial \xi}\frac{du'}{dh}\\
+        &= \frac{\partial f}{\partial u}v + \frac{\partial f}{\partial \xi}v'
+    \end{align*}
+    and hence
+    \[
+       \Phi'(0) = \int_a^b [f_u(x,\overline{u}(x),\overline{u}'(x))v(x) + f_\xi(x,\overline{u}(x),\overline{u}'(x))v'(x)]\, dx = 0
+    \]
+    Using Integration by Parts on the second term $f_\xi$ we get the following 
+    \begin{align*}
+        \int_a^b f_\xi(x,\overline{u}(x),\overline{u}'(x))v'(x)\, dx & \\
+        = \left[f_\xi(x,\overline{u}(x),\overline{u}'(x))v(x)\right]_a^b &- \int_a^b \left[ \frac{d}{dx}f_\xi(x,\overline{u}(x),\overline{u}'(x)) \right] v(x) \, dx
+    \end{align*}
+    Since $v(a) = v(b) = 0$ the first term above vanishes. This leaves us with
+    \[
+    \Phi'(0) = \int_a^b \left[ f_u(x,\overline{u}(x),\overline{u}'(x)) - \frac{d}{dx}f_\xi(x,\overline{u}(x),\overline{u}'(x)) \right] v(x) \, dx = 0
+    \]
+    Applying the fundamental lemma of the calculus of variations, Theorem~\ref{thm:Fundamental lemma of the calculus of variations}, we have
+    \[
+        f_u(x,\overline{u}(x),\overline{u}'(x)) - \frac{d}{dx}f_\xi(x,\overline{u}(x),\overline{u}'(x)) = 0
+    \]
+    which is the Euler-Legrange equation \eqref{eq:E-L_E}.
+    \item[(ii)]  to write 
+    \item[(iii)] to write 
+\end{enumerate}
+
+\end{proof}
+
+We can and will regularly write the Euler--Lagrange equation in its shorter form
+\[
+f_y - \frac{d}{dx}f_{\xi} = 0
+\]
+\subsection{Continuous and H\"older Spaces}
+
+\subsection{Lebesgue Spaces}
+
+\begin{theorem}[Fundamental lemma of the calculus of variations]
+\label{thm:Fundamental lemma of the calculus of variations}
+Let $\Omega$ be an open set of $\mathbb{R}^n$ and $u \in L^1_{loc}(\Omega)$ be such that 
+$$
+\int_\Omega u(x)\, \varphi(x) \, \mathrm{d}x = 0, \qquad \forall \varphi \in C^{\infty}_0(\Omega)
+$$
+then $u = 0$, a.e. in $\Omega$.
+\end{theorem}
+\begin{proof}
+    to write 
+\end{proof}
+\subsection{Sobolev Spaces}
+
+\subsection{Convex Analysis}
