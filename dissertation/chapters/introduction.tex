@@ -109,7 +109,7 @@ The second and higher derivatives of $F$ can then be used to investigate the nat
 
 This formulation is a special case of the general variational problem introduced previously. In contrast to the general formulation, the Classical Method considers a one-dimensional domain $[a,b]$ and scalar-valued functions $u:[a,b]\rightarrow\mathbb{R}$. Consequently, the gradient $\nabla u$ is replaced by the ordinary derivative $u'$. The admissible functions are also restricted to $C^1([a,b])$ and are subject to fixed endpoint conditions $u(a)=\alpha$ and $u(b)=\beta$. The endpoint conditions will henceforth be referred to as boundary conditions.
 
-To solve these problems we can derive the Euler–Lagrange equation that should satisfy any $C^2([a,b])$ minimiser, $\overline{u}$, of $\eqref{eq:Classical_P}$. The Euler–Lagrange equation is analogous to $F'(\overline{x}) = 0$ in $\mathbb{R}^n$. \cite{dacorogna}
+To solve these problems, we can derive the Euler–Lagrange equation that should satisfy any $C^2([a,b])$ minimiser, $\overline{u}$, of $\eqref{eq:Classical_P}$. The Euler–Lagrange equation is analogous to $F'(\overline{x}) = 0$ in $\mathbb{R}^n$. \cite{dacorogna}
 
 The following theorem provides a necessary condition for a sufficiently smooth minimiser of the problem \eqref{eq:Classical_P}. It is stated here in the form used throughout this dissertation; the result corresponds to Theorem 2.1 in Dacorogna \cite[Theorem 2.1, p.~59]{dacorogna}.
 
@@ -192,6 +192,86 @@ We can and will regularly write the Euler--Lagrange equation in its shorter form
 \[
 f_y - \frac{d}{dx}f_{\xi} = 0
 \]
+
+Using Theorem~\ref{thm:Euler-Lagrange}, we can obtain minimisers for one-dimensional variational problems. We now consider several examples, starting with the problem of finding the shortest curve joining two points in the plane. Next, Dido's problem before exploring a counterexample that shows the limitation of the Classical Method to be used as motivation for the development of the Direct Method. 
+
+\begin{example}
+\label{ex:straight-line}
+Find the shortest curve joining the points$A=(x_a,y_a)$ and $B=(x_b,y_b)$ in the plane, where $x_a<x_b$. We begin with the variational functional for arc length,
+\[
+J(y)=\int_{x_a}^{x_b}\sqrt{1+(y'(x))^2}\,dx.
+\]
+The integrand is
+\[
+f(x,y,\xi)=\sqrt{1+\xi^2},
+\]
+which is independent of $x$ and $y$. In particular,
+$f_y=0$, so the Euler--Lagrange equation \eqref{eq:E-L_E} reduces to
+\[
+\frac{d}{dx}f_{y'}(x,y(x),y'(x))=0.
+\]
+Differentiating $f$ with respect to $y'$ gives
+\[
+f_{y'}(x,y(x),y'(x)) = \frac{y'(x)}{\sqrt{1+(y'(x))^2}}.
+\]
+Hence, by the reduced Euler--Lagrange equation, $f_{y'}$ is constant on $[x_a,x_b]$. Since
+\[
+\frac{y'}{\sqrt{1+(y')^2}}
+\]
+is a strictly increasing function of $y'$, it follows that $y'$ is constant. Therefore,
+\[
+y(x)=c_1x+c_2,
+\]
+for constants $c_1,c_2\in\mathbb{R}$. Thus, the extremal is a straight line, as expected.
+\end{example}
+
+\begin{example}[Dido's problem]
+\label{ex:Dido's problem}
+As mentioned previously Didos problem concerns ourselves with finding curve that encloses the maximum area with a given restriction on length of said curve. We can formulate this problem in the following way. 
+
+Among the smooth functions $y$ which are positive on $(0,l)$ and which vanish at endpoints $x=0$ and $x=l$, find the function that gives a minimum for
+\[
+J(y) = -\int_0^ly(x)\sqrt{1+(y'(x))^2} \, dx
+\]
+The derivation for this formulation can be found at the appendix (yet to write). The Integrand is
+\[
+f(x,y,\xi) = -y\sqrt{1-\xi^2}
+\]
+Since $f$ does not explicitly depend on $x$ we can use another reduced form of the Euler--Lagrange equation \eqref{eq:E-L_E}, 
+\[
+f-\xi f_\xi = \text{constant}
+\]
+Substituting our integrand into this reduced Euler--Lagrange equation gives the following
+\begin{align*}
+ f-y' f_{y'} &\iff -y\sqrt{1-y'^2} -y' \left(\frac{yy'}{\sqrt{1-y'^2}}\right) = c\\
+ &\iff y\sqrt{1-y'^2} + y' \left(\frac{yy'}{\sqrt{1-y'^2}}\right) = \overline{c}\\
+ &\iff y(1-y'^2) + yy'^2 = \overline{c}\sqrt{1-y'^2}\\
+ &\iff y = \overline{c}\sqrt{1-y'^2}\\
+ &\iff \overline{c}y' = \pm\sqrt{\overline{c}^2 - y^2} \quad \text{if $\overline{c} \neq 0$, $y = 0$ otherwise.}
+\end{align*}
+We now have a ODE to solve, by separation of variables we have,
+\[
+\int \frac{\overline{c}}{\sqrt{\overline{c}^2 - y^2}} \, dy = \pm \int \, dx
+\]
+Using a substitution of $y(u) = \overline{c}\sin(u) \implies dy = \overline{c}\cos(u) \,du$ on the left hand side,
+\[
+\int \frac{\overline{c}}{\sqrt{\overline{c}^2 - y^2}} \, dy = \int \frac{\overline{c}^2\cos(u)}{\overline{c}\cos(u)} \, du = \overline{c} u + \tilde{c} 
+\]
+we therefore obtain 
+\[
+    x = \overline{c} u + \tilde{c} \implies u = \frac{x}{\overline{c}} + \tilde{c}
+\]
+for $\overline{c} \neq 0$ we have 
+\[
+y(x) = \overline{c} \sin (\frac{x}{\overline{c}} + \tilde{c})
+\]
+as a solution to the variation problem and therefore an extremal. Using our boundary conditions we can find a parametric representation as a solution to the problem.
+\[
+(x(s),y(s)) = (-\frac{l}{\pi}\cos(\frac{\pi}{l}s) - \frac{l}{\pi}, \frac{l}{\pi}\sin(\frac{\pi}{l}s))
+\]
+the derivation of which is beyond the scope of this example.
+\end{example}
+
 \subsection{Continuous and H\"older Spaces}
 
 \subsection{Lebesgue Spaces}
