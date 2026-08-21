@@ -415,86 +415,70 @@ def simulated_segment_annealing_curvature(
     base_step = np.median(np.linalg.norm(np.diff(initial_path.points, axis=0), axis=1))
 
     for i in range(iterations):
+        # Generate neighbour
+        candidate_path = segment_shift_move(
+            current_path,
+            terrain,
+            sigma,
+            alpha,
+            segment_length
+        )
+        
+        candidate_cost = total_cost(
+            candidate_path,
+            terrain,
+            terrain_weight,
+            lam,
+            mu
+        )
+
         accept = False
-        candidate_path = None
-        candidate_cost = None
 
-        local_sigma = sigma
-        current_diff = np.diff(current_path.points, axis=0)
-        current_seg_len = np.linalg.norm(current_diff, axis=1)
-        current_abs_dy = np.abs(current_diff[:, 1])
-        current_max_seg = current_seg_len.max()
-        current_max_dy = current_abs_dy.max()
-        adaptive_base_step = max(base_step, current_max_seg / 3.0, current_max_dy / 2.5)
+        if i < 20:
+            print("\nIteration:", i)
 
-        for _ in range(max_candidate_attempts):
-            proposal = segment_shift_move(
-                current_path,
-                terrain,
-                local_sigma,
-                alpha,
-                segment_length
+            print("Current cost:", current_cost)
+            print("Candidate cost:", candidate_cost)
+            print("Delta:", candidate_cost - current_cost)
+
+            print("Candidate components:")
+            print(
+                "Terrain:",
+                terrain_cost(candidate_path, terrain)
+            )
+            print(
+                "Curvature:",
+                terrain_curvature_cost(candidate_path)
+            )
+            print(
+                "Length:",
+                terrain_length_cost(candidate_path)
             )
 
-            if np.array_equal(proposal.points, current_path.points):
-                local_sigma *= retry_sigma_decay
-                continue
-
-            if (
-                valid_path_order(proposal)
-                and valid_path_terrain(proposal, terrain)
-                and geometric_guard(proposal, adaptive_base_step)
-            ):
-                proposal_diff = np.diff(proposal.points, axis=0)
-                proposal_seg_len = np.linalg.norm(proposal_diff, axis=1)
-                proposal_abs_dy = np.abs(proposal_diff[:, 1])
-
-                if (
-                    proposal_seg_len.max() > 1.05 * current_max_seg
-                    or proposal_abs_dy.max() > 1.05 * current_max_dy
-                ):
-                    local_sigma *= retry_sigma_decay
-                    continue
-
-                candidate_path = proposal
-                candidate_cost = total_cost(
-                    candidate_path,
-                    terrain,
-                    terrain_weight,
-                    lam,
-                    mu
-                )
-                break
-
-            local_sigma *= retry_sigma_decay
-
-        attempted_count += 1
-
-        if candidate_path is not None:
-            if debug and i < 20:
-                print("\nIteration:", i)
-                print("Current cost:", current_cost)
-                print("Candidate cost:", candidate_cost)
-                print("Delta:", candidate_cost - current_cost)
-                print("Candidate sigma:", local_sigma)
-                print("Candidate components:")
-                print("Terrain:", terrain_cost(candidate_path, terrain))
-                print("Curvature:", terrain_curvature_cost(candidate_path))
-                print("Length:", terrain_length_cost(candidate_path))
+        # Only accept paths satisfying the ordering constraint and impassability
+        if valid_path_order(candidate_path) & valid_path_terrain(candidate_path, terrain):
 
             delta = candidate_cost - current_cost
 
+            # Accept better solutions
             if delta < 0:
                 accept = True
+
+            # Accept worse solutions probabilistically
             else:
-                probability = np.exp(-delta / temperature)
+                probability = np.exp(
+                    -delta / temperature
+                )
                 accept = np.random.random() < probability
+
 
         if accept:
             current_path = copy.deepcopy(candidate_path)
             current_cost = candidate_cost
-            accepted_count += 1
-            path_history.append(copy.deepcopy(current_path))
+
+            # store accepted path
+            path_history.append(current_path)
+
 
         # Update best solution
         if current_cost < best_cost:
