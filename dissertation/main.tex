@@ -2,9 +2,18 @@
 
 \documentclass[12pt]{report}
 
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amssymb,amsthm,cancel}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{color}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+\newtheorem{remark}{Remark}[chapter]
 
 \title{MSc Mathematics Dissertation}
 \author{Daniel Skerman}
@@ -19,8 +28,8 @@
 \chapter{Introduction}
 \input{chapters/introduction}
 
-\chapter{Mathematical Background}
-\input{chapters/background}
+\chapter{Mathematical Modelling}
+\input{chapters/mathematical_modelling}
 
 \chapter{The Direct Method}
 \input{chapters/direct_method}
