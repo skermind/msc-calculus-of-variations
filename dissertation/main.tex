@@ -1,8 +1,22 @@
-% main.tex
-
 \documentclass[12pt]{report}
 
+\usepackage{fontspec}
+
+\setmainfont{Times New Roman}
+
+\usepackage[
+    top=2.54cm,
+    bottom=2.54cm,
+   right=2.54cm,    
+   left=4cm
+]{geometry}
+
+\usepackage{setspace}
+
+\onehalfspacing
+
 \usepackage{amsmath,amssymb,amsthm,cancel}
+\usepackage{pdfpages}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{color}
@@ -21,7 +35,7 @@
 
 \begin{document}
 
-\maketitle
+\includepdf[pages=1]{title}
 
 \tableofcontents
 
