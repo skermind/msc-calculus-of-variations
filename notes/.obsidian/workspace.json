@@ -4,18 +4,18 @@
     "type": "split",
     "children": [
       {
-        "id": "514f79cba30f5906",
+        "id": "d854ac75ac2af699",
         "type": "tabs",
         "children": [
           {
-            "id": "d33eca35098b066e",
+            "id": "7ee26ecfe9c8c1c5",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
                 "file": "Word Count Tracker.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
               "title": "Word Count Tracker"
@@ -186,38 +186,38 @@
       "bases:Create new base": false
     }
   },
-  "active": "d33eca35098b066e",
+  "active": "7ee26ecfe9c8c1c5",
   "lastOpenFiles": [
-    "Word Count Tracker.md",
-    "Preliminaries/1.5 Convex Analysis.md",
     "Preliminaries/1.3 Lp spaces.md",
+    "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
     "Preliminaries/1.2 Continuous and Hölder continuous functions.md",
+    "Word Count Tracker.md",
+    "ReadingList/Kielhöfer/HansjörgKielhöfer_CalculusofVariations_Book.pdf",
+    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
+    "ReadingList/Santambrogio/FilippoSantambrogio_ACourseintheCalculusofVariations_Book.pdf",
+    "TheDirectMethod/3.2 The Model Case.md",
+    "TheDirectMethod/3.1 Introduction.md",
+    "TheDirectMethod/3.3 A General Existence Theorem.md",
+    "TheDirectMethod/TheDirectMethod.md",
+    "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
+    "Preliminaries/Preliminaries.md",
+    "Preliminaries/1.5 Convex Analysis.md",
     "Preliminaries/1.4 Sobolev Spaces.md",
     "ReadingList/Dacorogna/Dacorogna Note.md",
-    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
-    "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
     "2026-08-10.md",
     "Untitled 1.base",
     "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
     "Plan/Model.md",
     "Plan/Personal Motivations and Inital Plan.md",
-    "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
-    "TheDirectMethod/TheDirectMethod.md",
     "Nomenclature.md",
     "Untitled.base",
-    "TheDirectMethod/3.1 Introduction.md",
-    "TheDirectMethod/3.3 A General Existence Theorem.md",
-    "TheDirectMethod/3.2 The Model Case.md",
     "Pasted image 20260620122930.png",
     "Pasted image 20260620123117.png",
     "ReadingList/Rindler/Rindler Note.md",
-    "Preliminaries/Preliminaries.md",
     "TheDirectMethod",
     "2026-06-24.md",
     "Preliminaries",
     "Supervision Meetings/Supervision Meetings.md",
-    "ReadingList/Santambrogio/FilippoSantambrogio_ACourseintheCalculusofVariations_Book.pdf",
-    "ReadingList/Kielhöfer/HansjörgKielhöfer_CalculusofVariations_Book.pdf",
     "ReadingList/Santambrogio/Santambrogio Note.md",
     "ReadingList/Kielhöfer/Kielhöfer Note.md",
     "Personal Motivations and Initial Plan.md",
