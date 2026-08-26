@@ -1,0 +1,530 @@
+\section{Introduction}
+
+In this chapter, we describe and evaluate the results of a numerical investigation into the optimisation of paths over a cost field. The numerical model aims to balance three competing objectives: the cost of traversing the terrain, the total length of the path, and its curvature. As discussed in the previous chapter, a useful interpretation of this problem is the placement of a railway track, where it is desirable to minimise the cost of the terrain through which the track passes while also keeping the total length and curvature of the track within reasonable bounds.
+
+We consider the same model problem to which the Direct Method was applied in the previous chapter, given by \eqref{eq:ModelProblem}. For completeness, we first recall the formulation of this problem before introducing its numerical approximation.
+
+We then describe the numerical method used to obtain approximate minimisers of the functional. The optimisation is performed using simulated annealing, with a segmented shift move used to generate neighbouring paths. This stochastic approach allows the algorithm to explore the space of admissible paths while providing the possibility of escaping local minima. We then describe the discretisation of the model problem and its implementation in Python, before presenting and analysing the numerical results obtained.
+
+The complete source code and computational results used in this chapter are publicly available in the accompanying GitHub repository \cite{skerman2026calculus}.
+
+\section{Formulation of the Model Problem}
+\label{sec:model_problem}
+
+In this chapter, we consider the numerical approximation of the terrain
+path-planning problem introduced in the previous chapter. The objective
+is to determine an admissible path which balances three competing
+considerations: the cost of traversing the terrain, the smoothness of
+the path, and its overall length.
+
+Let $\Omega \subset \mathbb{R}^2$ denote the domain representing the
+terrain, and let $a,b \in \Omega$ denote the prescribed start and end
+points, respectively. An admissible path is represented by a
+sufficiently smooth curve
+\[
+\gamma : [0,1] \rightarrow \mathbb{R}^2,
+\]
+satisfying the boundary conditions
+\[
+\gamma(0)=a,
+\qquad
+\gamma(1)=b.
+\]
+The collection of admissible curves satisfying these boundary
+conditions, together with any additional constraints imposed by the
+terrain, is denoted by $\Gamma$.
+
+The terrain is described by a cost field
+\[
+c:\Omega\rightarrow\mathbb{R},
+\]
+where $c(x,y)$ represents the cost associated with traversing the
+terrain at the point $(x,y)$. In the simplest formulation, the cost of
+a path is given by
+\begin{equation}
+J_{\mathrm{terrain}}(\gamma)
+=
+\int_\gamma c(x,y)\,ds.
+\label{eq:terrain_functional}
+\end{equation}
+This functional accounts for both the cost of the terrain encountered
+by the path and the distance travelled through each region.
+
+In order to incorporate additional considerations relevant to the
+path-planning problem, penalties for curvature and total path length
+are introduced. The resulting functional is written in the compact
+form
+\begin{equation}
+\boxed{
+J(\gamma)
+=
+\int_\gamma
+\left[
+w_c c(x,y)
++
+\lambda\kappa^2
++
+\mu
+\right]\,ds
+}
+\label{eq:ModelProblem}
+\end{equation}
+where $w_c$, $\lambda$, and $\mu$ are non-negative parameters controlling
+the relative contribution of the terrain cost, curvature, and length,
+respectively.
+
+The first term in the integrand,
+\[
+w_c c(x,y),
+\]
+represents the cost associated with traversing the terrain. The
+parameter $w_c$ allows the contribution of the terrain cost to be
+scaled relative to the additional penalties.
+
+The second term,
+\[
+\lambda\kappa^2,
+\]
+penalises curvature. In particular, the square of the curvature assigns
+increasingly greater cost to regions of the path with large curvature,
+thereby discouraging sharp changes in direction and favouring smoother
+paths.
+
+Finally, the constant term $\mu$ represents a penalty on the total
+length of the path. Since
+\[
+L(\gamma)=\int_\gamma 1\,ds,
+\]
+the contribution of this term to the functional is
+\[
+\mu\int_\gamma 1\,ds
+=
+\mu L(\gamma).
+\]
+Consequently, the functional in \eqref{eq:ModelProblem} can equivalently
+be written as
+\begin{equation}
+J(\gamma)
+=
+w_c\int_\gamma c(x,y)\,ds
++
+\lambda\int_\gamma\kappa^2\,ds
++
+\mu L(\gamma).
+\label{eq:expanded_model}
+\end{equation}
+
+The corresponding variational problem is therefore
+\begin{equation}
+\inf_{\gamma\in\Gamma} J(\gamma).
+\label{eq:extended_problem}
+\end{equation}
+
+The three terms in \eqref{eq:ModelProblem} introduce a trade-off between
+terrain cost, path smoothness, and path length. Increasing $w_c$
+favours paths which avoid regions of high terrain cost, while increasing
+$\lambda$ places greater emphasis on smoothness. Similarly, increasing
+$\mu$ makes longer paths increasingly expensive and therefore favours
+shorter routes. The numerical investigation that follows seeks to
+understand how these competing terms influence the resulting
+approximate minimisers.
+
+\subsection{Arc Length and Path Length}
+\label{subsec:arc_length}
+
+Let the curve $\gamma$ be parametrised by
+\[
+\gamma(t)=(x(t),y(t)),
+\qquad t\in[0,1].
+\]
+The length of the curve is given by
+\begin{equation}
+L(\gamma)
+=
+\int_0^1
+\|\gamma'(t)\|\,dt.
+\label{eq:path_length}
+\end{equation}
+
+More generally, the arc length measured from $\gamma(0)$ to
+$\gamma(t)$ is
+\begin{equation}
+s(t)
+=
+\int_0^t
+\|\gamma'(\tau)\|\,d\tau.
+\label{eq:arc_length}
+\end{equation}
+
+Thus, an integral with respect to arc length can be expressed in terms
+of the parameter $t$ according to
+\begin{equation}
+\int_\gamma f(x,y)\,ds
+=
+\int_0^1
+f(\gamma(t))
+\|\gamma'(t)\|\,dt.
+\label{eq:line_integral}
+\end{equation}
+
+In particular, the terrain component of the functional can be written
+as
+\begin{equation}
+\int_\gamma c(x,y)\,ds
+=
+\int_0^1
+c(\gamma(t))
+\|\gamma'(t)\|\,dt.
+\end{equation}
+
+\subsection{Curvature Penalty}
+\label{subsec:curvature_penalty}
+
+The curvature of a curve measures the rate at which its direction
+changes with respect to arc length. When $\gamma$ is parametrised by
+arc length $s$, the tangent vector satisfies
+\[
+\left\|\frac{d\gamma}{ds}\right\|=1,
+\]
+and the curvature is given by
+\begin{equation}
+\kappa(s)
+=
+\left\|
+\frac{d^2\gamma}{ds^2}
+\right\|.
+\label{eq:curvature_arclength}
+\end{equation}
+
+The curvature contribution to the functional is consequently
+\begin{equation}
+J_{\mathrm{curvature}}(\gamma)
+=
+\int_\gamma \kappa^2\,ds.
+\label{eq:curvature_functional}
+\end{equation}
+
+The use of $\kappa^2$ ensures that curvature is penalised independently
+of its direction, while placing a greater penalty on regions where the
+path bends sharply. This provides a mechanism for controlling the
+smoothness of the resulting path.
+
+The formulation in \eqref{eq:ModelProblem} therefore provides a
+mathematical representation of the competing requirements of the
+path-planning problem. In the following sections, this continuous
+variational problem is discretised and implemented computationally,
+allowing approximate minimisers to be obtained using simulated
+annealing.
+
+\section{Numerical Discretisation} 
+
+In order to investigate the model problem computationally, the continuous variational problem must first be converted into a discrete form which can be evaluated numerically. In particular, both the terrain and the admissible paths must be represented using a finite number of discrete points. This provides a finite-dimensional approximation to the original optimisation problem, which can then be investigated using the simulated annealing method described in the following sections.
+
+The numerical implementation was developed using Python within Jupyter notebooks. A class-based architecture was adopted to separate the representation of the terrain, paths, and associated cost calculations. The implementation was also modularised so that individual components of the numerical model could be modified and tested independently. The complete implementation is available in the accompanying GitHub repository \cite{skerman2026calculus}.
+
+\subsection{Discretisation of the Terrain}
+
+We initially discretise the terrain as an $n\times n $ grid of points with a given cost, $c$, at each point. As part of the terrain class we can aslo add a obistcal to the terrian. At the time of writing the only obistcan you can add is a hill. This is given by its center co-ordiates, radius, and then peak cost. A negative expoental function is applied to reduce cost the hill from its centre point up to a given radius.  
+
+
+\subsection{Discretisation of the Terrain}
+\label{subsec:terrain_discretisation}
+
+The continuous terrain domain $\Omega$ is discretised into an
+$n\times n$ grid, with each grid point assigned a corresponding terrain
+cost $c(x,y)$. For the simulations considered in this chapter, the
+domain is taken to be
+\[
+\Omega=[0,100]\times[0,100],
+\]
+with a resolution of $100\times100$ grid points. Initially, a uniform
+background cost of $c_0=0.1$ is assigned to the entire domain.
+
+To introduce variation in the terrain cost, a Gaussian-shaped hill is
+added to the cost field. The hill is defined by its centre
+$(x_c,y_c)$, radius $r$, and peak cost $c_{\max}$. Let
+\[
+d(x,y)
+=
+\sqrt{(x-x_c)^2+(y-y_c)^2}
+\]
+denote the distance from $(x,y)$ to the centre of the hill. The terrain
+cost within the specified radius is then given by
+\begin{equation}
+c(x,y)
+=
+c_0
++
+(c_{\max}-c_0)
+\exp\left(
+-\frac{d(x,y)^2}{2\sigma^2}
+\right),
+\label{eq:hill_cost}
+\end{equation}
+where
+\[
+\sigma=\frac{r}{3}.
+\]
+The Gaussian profile produces the maximum cost at the centre of the
+hill, with the cost decreasing smoothly towards the edge of its
+specified radius. Outside this radius, the hill has no effect on the
+background terrain cost.
+
+For the terrain shown in Figure~\ref{fig:hill_terrain}, the parameters
+used are
+\[
+(x_c,y_c)=(50,50),
+\qquad
+r=30,
+\qquad
+c_{\max}=0.8.
+\]
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/hill_terrain.png}
+    \caption{Discretised terrain cost field with a Gaussian-shaped hill.}
+    \label{fig:hill_terrain}
+\end{figure}
+
+\subsection{Discrete Representation of Paths}
+
+% Explain that the continuous curve is approximated by a finite
+% sequence of points.
+%
+% Define the discrete path and explain how consecutive points are
+% joined to approximate a continuous curve.
+
+
+\subsection{Approximation of the Cost Functional}
+
+% Explain how the continuous integrals are approximated numerically.
+%
+% Introduce the discrete approximation of the terrain cost.
+%
+% Explain how path length is calculated.
+%
+% Explain how curvature is approximated from the discrete path.
+%
+% Combine these components to obtain the discrete objective function.
+
+
+\section{Computational Implementation}
+
+\subsection{Terrain Representation}
+
+% Describe how the terrain is represented computationally in Python.
+%
+% Explain the size and resolution of the terrain grid and how
+% traversal costs are stored and accessed.
+
+
+\subsection{Path Representation}
+
+% Describe how paths are stored as an ordered sequence of points.
+%
+% Explain how the start and end points remain fixed during optimisation.
+%
+% Discuss any checks used to ensure that paths remain valid.
+
+
+\subsection{Evaluation of the Cost Function}
+
+% Describe the implementation of the numerical cost function.
+%
+% Explain how terrain cost, curvature cost and length cost are
+% calculated and combined.
+%
+% Discuss the choice of weights used in the numerical experiments.
+
+
+\section{Simulated Annealing}
+
+\subsection{Motivation}
+
+% Explain why a stochastic optimisation method is used.
+%
+% Discuss the difficulty of finding analytical solutions to the model
+% problem and the potentially complex or non-convex nature of the
+% optimisation problem.
+
+
+\subsection{The Simulated Annealing Algorithm}
+
+% Introduce the main steps of the simulated annealing algorithm.
+%
+% Explain the initial solution, generation of neighbouring solutions,
+% acceptance of improvements and the possibility of accepting worse
+% solutions.
+
+
+\subsection{Acceptance Criterion}
+
+% Define the change in the objective function.
+%
+% Introduce the probability of accepting a worse solution and explain
+% the role of temperature.
+%
+% Discuss how this allows the algorithm to escape local minima.
+
+
+\subsection{Temperature and Cooling Schedule}
+
+% Describe the choice of initial temperature and cooling schedule.
+%
+% Explain how the temperature decreases during the optimisation.
+%
+% State the parameter values used in the experiments and discuss how
+% these were selected.
+
+
+\section{Neighbourhood Construction}
+
+\subsection{The Basic Shift Move}
+
+% Describe the original method used to generate neighbouring paths.
+%
+% Explain how a point, or part of the path, is randomly displaced.
+%
+% Discuss how the resulting path is evaluated.
+
+
+\subsection{Limitations of the Basic Shift Move}
+
+% Discuss any difficulties encountered using the basic shift move.
+%
+% For example, explain limitations in making large-scale changes to the
+% path or difficulties in escaping particular path configurations.
+%
+% Use this section to motivate the development of the segmented shift
+% move.
+
+
+\subsection{The Segmented Shift Move}
+
+% Introduce the segmented shift move.
+%
+% Explain how a section of the path is selected and shifted.
+%
+% Discuss why this allows the algorithm to explore the solution space
+% more effectively than the basic shift move.
+%
+% Include diagrams or examples if appropriate.
+
+
+\section{Progressive Development of the Model}
+
+% This section documents the development of the numerical model from
+% simple examples to increasingly complex problems.
+
+
+\subsection{Uniform Terrain}
+
+% Begin with the simplest model in which the terrain has uniform cost.
+%
+% Discuss the expected behaviour of the minimising path.
+%
+% Use this example as an initial validation of the numerical method.
+
+
+\subsection{Variable Terrain}
+
+% Introduce terrain with spatially varying costs.
+%
+% Investigate how the optimisation balances path length against
+% travelling through expensive regions of the terrain.
+
+
+\subsection{Introduction of a Curvature Penalty}
+
+% Introduce the curvature component of the objective function.
+%
+% Compare paths obtained using different values of the curvature
+% parameter.
+%
+% Discuss the effect of the penalty on path smoothness.
+
+
+\subsection{Introduction of a Length Penalty}
+
+% Introduce the length component of the objective function.
+%
+% Investigate how different parameter values influence the balance
+% between avoiding expensive terrain and taking a direct route.
+
+
+\subsection{Impassable Terrain}
+
+% Introduce regions that cannot be traversed by the path.
+%
+% Explain how feasibility is checked computationally.
+%
+% Discuss the additional difficulty of ensuring that path segments,
+% rather than only path points, do not intersect impassable regions.
+%
+% Describe any modifications required to generate feasible initial
+% paths and maintain feasibility during optimisation.
+
+
+\section{Numerical Results and Discussion}
+
+\subsection{Comparison of Optimised Paths}
+
+% Present and compare the paths obtained for the different model
+% configurations.
+%
+% Use figures to illustrate the paths and their relationship to the
+% terrain.
+
+
+\subsection{Effect of Model Parameters}
+
+% Analyse the effect of changing the terrain, curvature and length
+% weights.
+%
+% Discuss the trade-offs observed between the different components of
+% the objective function.
+
+
+\subsection{Performance of the Neighbourhood Moves}
+
+% Compare the performance of the basic shift move and segmented shift
+% move where appropriate.
+%
+% Discuss differences in the algorithm's ability to explore the
+% solution space and obtain lower-cost paths.
+
+
+\subsection{Variability Between Runs}
+
+% Discuss the stochastic nature of simulated annealing.
+%
+% If experiments were repeated, compare the variation in the resulting
+% paths and objective values.
+%
+% Discuss the implications for interpreting the numerical results.
+
+
+\section{Limitations and Further Work}
+
+% Discuss the limitations of the numerical approach.
+%
+% Possible limitations include:
+% - The discretisation provides only an approximation to a continuous path.
+% - Simulated annealing does not guarantee the global minimum.
+% - Results may depend on the choice of algorithm parameters.
+% - Curvature approximations depend on the path discretisation.
+% - The computational cost may increase for more complicated terrain.
+%
+% Discuss possible improvements and directions for future work.
+
+
+\section{Chapter Summary}
+
+% Briefly summarise the numerical methods and main findings of the chapter.
+%
+% Highlight how the continuous variational problem was transformed into
+% a discrete optimisation problem and investigated using simulated
+% annealing.
+%
+% Provide a transition to the next chapter, if appropriate.
