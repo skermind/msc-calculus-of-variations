@@ -223,11 +223,6 @@ In order to investigate the model problem computationally, the continuous variat
 The numerical implementation was developed using Python within Jupyter notebooks. A class-based architecture was adopted to separate the representation of the terrain, paths, and associated cost calculations. The implementation was also modularised so that individual components of the numerical model could be modified and tested independently. The complete implementation is available in the accompanying GitHub repository \cite{skerman2026calculus}.
 
 \subsection{Discretisation of the Terrain}
-
-We initially discretise the terrain as an $n\times n $ grid of points with a given cost, $c$, at each point. As part of the terrain class we can aslo add a obistcal to the terrian. At the time of writing the only obistcan you can add is a hill. This is given by its center co-ordiates, radius, and then peak cost. A negative expoental function is applied to reduce cost the hill from its centre point up to a given radius.  
-
-
-\subsection{Discretisation of the Terrain}
 \label{subsec:terrain_discretisation}
 
 The continuous terrain domain $\Omega$ is discretised into an
@@ -282,191 +277,325 @@ c_{\max}=0.8.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/hill_terrain.png}
+    \includegraphics[width=0.7\textwidth]{dissertation/figures/HillTerrain.png}
     \caption{Discretised terrain cost field with a Gaussian-shaped hill.}
     \label{fig:hill_terrain}
 \end{figure}
 
-\subsection{Discrete Representation of Paths}
+\subsection{Discretisation of the Path}
+\label{subsec:path_discretisation}
 
-% Explain that the continuous curve is approximated by a finite
-% sequence of points.
-%
-% Define the discrete path and explain how consecutive points are
-% joined to approximate a continuous curve.
+The continuous curve $\gamma$ is approximated by a finite sequence of
+ordered points
+\[
+\gamma_h=\{p_0,p_1,\ldots,p_N\},
+\qquad
+p_i=(x_i,y_i).
+\]
+The endpoints are fixed at the prescribed boundary points,
+\[
+p_0=a,
+\qquad
+p_N=b,
+\]
+while the intermediate points are varied during optimisation.
+Consecutive points are joined by straight-line segments.
 
+\subsection{Path Constraints}
+\label{subsec:path_constraints}
 
-\subsection{Approximation of the Cost Functional}
+Following the path discretisation, candidate paths are required to satisfy the constraints of the numerical model. Two
+conditions are imposed: the path must progress monotonically in the
+$x$-direction and must not enter any impassable region of the terrain.
 
-% Explain how the continuous integrals are approximated numerically.
-%
-% Introduce the discrete approximation of the terrain cost.
-%
-% Explain how path length is calculated.
-%
-% Explain how curvature is approximated from the discrete path.
-%
-% Combine these components to obtain the discrete objective function.
+The first condition requires
+\begin{equation}
+x_{i+1}>x_i,
+\qquad i=0,\ldots,N-1,
+\label{eq:x_order_constraint}
+\end{equation}
+which ensures that the path progresses from the start point towards the
+end point without reversing direction in the $x$-coordinate.
 
+The second condition requires the path to remain outside any
+impassable region. Since checking only the discrete path points would
+not guarantee that the connecting line segments avoid an obstacle, the
+segments between consecutive points are sampled at a number of
+intermediate locations. A candidate path is considered feasible only
+if none of these sampled points lies within an impassable region.
 
-\section{Computational Implementation}
+These conditions are checked before a candidate path can be accepted by
+the simulated annealing algorithm. They therefore restrict the search
+space to paths which satisfy the required geometric and terrain
+constraints.
 
-\subsection{Terrain Representation}
+\subsection{Cost Functional}
+\label{subsec:cost_functional}
 
-% Describe how the terrain is represented computationally in Python.
-%
-% Explain the size and resolution of the terrain grid and how
-% traversal costs are stored and accessed.
+The cost functional provides the objective used to evaluate each
+candidate path during the simulated annealing optimisation. For a
+discrete path $\gamma_h$, the three components of the continuous
+functional are calculated separately and then combined to give the
+total cost.
 
+The terrain contribution is approximated by considering each segment
+between consecutive points. The terrain cost is evaluated at the
+midpoint of each segment and multiplied by its length, giving
+\begin{equation}
+C_{\mathrm{terrain}}(\gamma_h)
+=
+\sum_{i=0}^{N-1}
+c\left(\frac{p_i+p_{i+1}}{2}\right)
+\|p_{i+1}-p_i\|.
+\label{eq:discrete_terrain_cost}
+\end{equation}
+This provides a numerical approximation to the terrain term
+\[
+\int_\gamma c(x,y)\,ds.
+\]
 
-\subsection{Path Representation}
+The length of the discrete path is calculated as
+\begin{equation}
+C_{\mathrm{length}}(\gamma_h)
+=
+\sum_{i=0}^{N-1}
+\|p_{i+1}-p_i\|,
+\label{eq:discrete_path_length}
+\end{equation}
+which provides an approximation to the continuous path length
+$L(\gamma)$.
 
-% Describe how paths are stored as an ordered sequence of points.
-%
-% Explain how the start and end points remain fixed during optimisation.
-%
-% Discuss any checks used to ensure that paths remain valid.
+Finally, the curvature contribution is estimated using the second
+finite difference of three consecutive path points:
+\begin{equation}
+q_i
+=
+p_{i+1}-2p_i+p_{i-1}.
+\label{eq:curvature_difference}
+\end{equation}
+The magnitude of $q_i$ measures the deviation of $p_i$ from the
+straight line suggested by its neighbours. The discrete curvature cost
+is therefore calculated as
+\begin{equation}
+C_{\mathrm{curvature}}(\gamma_h)
+=
+\sum_{i=1}^{N-1}
+\left\|
+p_{i+1}-2p_i+p_{i-1}
+\right\|^2.
+\label{eq:discrete_curvature_cost}
+\end{equation}
+Straight sections of the path give a zero contribution, while sharper
+changes in direction produce a larger penalty. This provides a simple
+substiution for the continuous curvature term
+$\int_\gamma \kappa^2\,ds$, although it does not explicitly account
+for the arc-length spacing between consecutive points.
 
-
-\subsection{Evaluation of the Cost Function}
-
-% Describe the implementation of the numerical cost function.
-%
-% Explain how terrain cost, curvature cost and length cost are
-% calculated and combined.
-%
-% Discuss the choice of weights used in the numerical experiments.
+The three components are then combined to form the discrete objective
+function
+\begin{equation}
+J_h(\gamma_h)
+=
+w_c C_{\mathrm{terrain}}(\gamma_h)
++
+\lambda C_{\mathrm{curvature}}(\gamma_h)
++
+\mu C_{\mathrm{length}}(\gamma_h).
+\label{eq:discrete_total_cost}
+\end{equation}
+This is the quantity evaluated by the simulated annealing algorithm
+when comparing candidate paths.
 
 
 \section{Simulated Annealing}
 
+In this section, we describe the simulated annealing method used to optimise the discretised model problem, together with the choices made in its implementation and the resulting behaviour. The approach is inspired by the method presented by Amberg \cite{AmbergDomschekeVo}. In their work, simulated annealing is applied to the capacitated minimum spanning tree problem. Having studied simulated annealing as part of the MSc module Stochastic Search and Optimisation, this provided motivation for applying the method to the path optimisation problem considered here.
+
 \subsection{Motivation}
 
-% Explain why a stochastic optimisation method is used.
-%
-% Discuss the difficulty of finding analytical solutions to the model
-% problem and the potentially complex or non-convex nature of the
-% optimisation problem.
+The stochastic approach used in this work is motivated by the distinction between proving the existence of a minimiser and actually finding one. The Direct Method of the Calculus of Variations can be used to establish the existence of minimisers for suitable functionals, but obtaining a minimiser explicitly can be considerably more challenging. For the model problem \eqref{eq:ModelProblem}, an analytical solution is generally difficult to obtain, particularly when the cost field $c(x,y)$ is complicated or not known in an explicit form.
 
+Simulated annealing provides a practical approach to this problem by combining random exploration of the search space with a mechanism for gradually favouring lower-cost solutions. The method was also computationally suitable for the resources available for this project, allowing repeated simulations to be performed on a personal M4 MacBook Air.
+
+A shift move was used to generate neighbouring paths. This provided a simple way of modifying individual points of the discretised path while also allowing the behaviour of the optimisation to be visualised during the simulation. This visualisation proved particularly useful for investigating the choice of the weighting parameters $(w_c,\lambda,\mu)$ and for identifying issues with the numerical implementation.
+
+{\color{red} once i have done the mathematical modelling I will come back to this to add more detail on why analytically is tricky}
 
 \subsection{The Simulated Annealing Algorithm}
+\label{subsec:simulated_annealing_algorithm}
 
-% Introduce the main steps of the simulated annealing algorithm.
-%
-% Explain the initial solution, generation of neighbouring solutions,
-% acceptance of improvements and the possibility of accepting worse
-% solutions.
+Simulated annealing is an iterative stochastic optimisation method in
+which a sequence of candidate solutions is generated and evaluated.
+Starting from an initial feasible path, a neighbouring path is
+generated using the segmented shift move described in
+Section~\ref{subsec:segmented_shift}. The cost of the candidate is then
+compared with that of the current path.
 
+If the candidate has a lower cost, it is accepted. A candidate with a
+higher cost may also be accepted according to the acceptance criterion
+described below. After each iteration, the temperature is reduced
+according to the chosen cooling schedule. Throughout the optimisation,
+the lowest-cost path encountered is stored as the best solution.
+\\
+\\
+The main steps of the algorithm can therefore be summarised as:
+\begin{enumerate}
+    \item Initialise the algorithm with a feasible path.
+    \item Generate a neighbouring candidate path.
+    \item Calculate the cost of the candidate using the discrete
+    objective functional.
+    \item Check that the candidate satisfies the required path
+    constraints.
+    \item Accept or reject the candidate according to the acceptance
+    criterion.
+    \item Update the best path found so far.
+    \item Reduce the temperature and repeat until the specified number
+    of iterations has been reached.
+\end{enumerate}
 
 \subsection{Acceptance Criterion}
+\label{subsec:acceptance_criterion}
 
-% Define the change in the objective function.
-%
-% Introduce the probability of accepting a worse solution and explain
-% the role of temperature.
-%
-% Discuss how this allows the algorithm to escape local minima.
+Let $J_{\mathrm{current}}$ denote the cost of the current path and
+$J_{\mathrm{candidate}}$ the cost of a proposed path. The change in
+cost is defined as
+\begin{equation}
+\Delta J
+=
+J_{\mathrm{candidate}}
+-
+J_{\mathrm{current}}.
+\label{eq:cost_difference}
+\end{equation}
 
+If $\Delta J<0$, the candidate has a lower cost and is accepted. If
+$\Delta J\geq0$, the candidate may still be accepted with probability
+\begin{equation}
+P(\mathrm{accept})
+=
+\exp\left(-\frac{\Delta J}{T}\right),
+\label{eq:annealing_probability}
+\end{equation}
+where $T$ denotes the current temperature.
+
+This allows the algorithm to occasionally accept higher-cost paths,
+particularly when the temperature is high. Such moves allow the search
+to move away from local minima and explore alternative regions of the
+solution space. As the temperature decreases, the probability of
+accepting higher-cost solutions also decreases, causing the algorithm
+to increasingly favour improvements.
+
+In addition to this cost-based acceptance criterion, candidate paths
+must satisfy the validity conditions imposed by the numerical model.
+In particular, the path ordering and terrain constraints are checked
+before a candidate can be accepted. These constraints are considered
+in more detail in Section~\ref{subsec:path_constraints}.
 
 \subsection{Temperature and Cooling Schedule}
+\label{subsec:temperature_cooling}
 
-% Describe the choice of initial temperature and cooling schedule.
-%
-% Explain how the temperature decreases during the optimisation.
-%
-% State the parameter values used in the experiments and discuss how
-% these were selected.
+The temperature controls the degree of exploration performed by the
+simulated annealing algorithm. The initial temperature determines the
+likelihood of accepting higher-cost candidate paths at the beginning
+of the optimisation, while progressively reducing the temperature
+causes the algorithm to become increasingly selective.
+
+In the implementation, the temperature is updated after each iteration
+according to the geometric cooling schedule
+\begin{equation}
+T_{k+1}=rT_k,
+\label{eq:cooling_schedule}
+\end{equation}
+where $r$ is the cooling rate. Starting from an initial temperature
+$T_0$, this gives
+\begin{equation}
+T_k=T_0r^k.
+\end{equation}
+
+For the simulations presented in this chapter, the simulated annealing
+algorithm was run for a specified number of iterations, with the
+initial temperature and cooling rate selected experimentally.
 
 
 \section{Neighbourhood Construction}
+\label{sec:neighbourhood_construction}
+
+At each iteration of the simulated annealing algorithm, a neighbouring
+path must be generated from the current path. The neighbourhood
+construction determines how the search explores the space of possible
+paths. Two approaches were considered: a basic shift move and a
+segmented shift move.
 
 \subsection{The Basic Shift Move}
+\label{subsec:shift_move}
 
-% Describe the original method used to generate neighbouring paths.
-%
-% Explain how a point, or part of the path, is randomly displaced.
-%
-% Discuss how the resulting path is evaluated.
+The initial neighbourhood construction used a shift move, in which a
+single interior waypoint of the path is selected and randomly
+perturbed. The displacement is sampled from a two-dimensional Gaussian
+distribution,
+\[
+(\Delta x,\Delta y)\sim\mathcal{N}(0,\sigma^2 I).
+\]
+The start and end points remain fixed, preserving the boundary
+conditions of the problem.
 
+The waypoint is selected probabilistically, with points in regions of
+higher terrain cost given greater probability of being selected. The
+resulting candidate path is then evaluated using the discrete cost
+functional before being passed to the acceptance criterion of the
+simulated annealing algorithm.
 
 \subsection{Limitations of the Basic Shift Move}
+\label{subsec:shift_move_limitations}
 
-% Discuss any difficulties encountered using the basic shift move.
-%
-% For example, explain limitations in making large-scale changes to the
-% path or difficulties in escaping particular path configurations.
-%
-% Use this section to motivate the development of the segmented shift
-% move.
+Although the basic shift move provides a simple method for exploring
+the space of paths, modifying only one waypoint at a time can make
+larger changes to the overall shape of the path difficult to achieve.
+In particular, substantial changes to a path may require many
+successive waypoint movements.
 
+This becomes more significant when the path needs to move around a
+larger region of high-cost or impassable terrain. Moving individual
+points can produce inefficient intermediate configurations and can
+limit the rate at which the algorithm explores substantially different
+path geometries. These observations motivated the introduction of a
+move which could modify several neighbouring points simultaneously.
 
 \subsection{The Segmented Shift Move}
+\label{subsec:segmented_shift}
 
-% Introduce the segmented shift move.
-%
-% Explain how a section of the path is selected and shifted.
-%
-% Discuss why this allows the algorithm to explore the solution space
-% more effectively than the basic shift move.
-%
-% Include diagrams or examples if appropriate.
+The segmented shift move extends the basic shift move by perturbing a
+contiguous section of the path rather than a single waypoint. A segment
+of a prescribed length is selected from the interior points of the
+path. The starting position of the segment is selected probabilistically
+according to the average terrain cost of the points within the
+segment, again favouring regions of higher terrain cost.
 
+Once selected, the entire segment is displaced by the same
+two-dimensional Gaussian random vector,
+\[
+(\Delta x,\Delta y)\sim\mathcal{N}(0,\sigma^2 I).
+\]
+The endpoints of the path remain fixed. The resulting candidate is
+then checked against the path constraints before its cost is evaluated
+and the simulated annealing acceptance criterion is applied.
 
-\section{Progressive Development of the Model}
-
-% This section documents the development of the numerical model from
-% simple examples to increasingly complex problems.
-
-
-\subsection{Uniform Terrain}
-
-% Begin with the simplest model in which the terrain has uniform cost.
-%
-% Discuss the expected behaviour of the minimising path.
-%
-% Use this example as an initial validation of the numerical method.
-
-
-\subsection{Variable Terrain}
-
-% Introduce terrain with spatially varying costs.
-%
-% Investigate how the optimisation balances path length against
-% travelling through expensive regions of the terrain.
-
-
-\subsection{Introduction of a Curvature Penalty}
-
-% Introduce the curvature component of the objective function.
-%
-% Compare paths obtained using different values of the curvature
-% parameter.
-%
-% Discuss the effect of the penalty on path smoothness.
-
-
-\subsection{Introduction of a Length Penalty}
-
-% Introduce the length component of the objective function.
-%
-% Investigate how different parameter values influence the balance
-% between avoiding expensive terrain and taking a direct route.
-
-
-\subsection{Impassable Terrain}
-
-% Introduce regions that cannot be traversed by the path.
-%
-% Explain how feasibility is checked computationally.
-%
-% Discuss the additional difficulty of ensuring that path segments,
-% rather than only path points, do not intersect impassable regions.
-%
-% Describe any modifications required to generate feasible initial
-% paths and maintain feasibility during optimisation.
+Moving several neighbouring points together allows larger-scale
+changes in the geometry of the path while maintaining the local
+structure of the displaced section. This provides the algorithm with
+an additional mechanism for exploring substantially different path
+configurations compared with the basic shift move.
 
 
 \section{Numerical Results and Discussion}
+
+In this section I will discuss the numerical results of the simulated annealing process with the effect of the choice of paramiters for the alongside the evidence showing the need for the segmented shift move. This simuation is fairly abstract but it shows that when minimising the cost of path where legth, terran and curvcertuire effect the cost we get a non-trivial result. Animations showing the evolution of the candidate path during the simulated annealing procedure are available in the accompanying GitHub repository \cite{skerman2026calculus}.
+
+\subsection{Performance of the Neighbourhood Moves}
+
+I'd like to start with proving envidence for the non standard use of a segmented shift move with move preferance weighted to the cost of the segments that is being moved. As discussed in the previous section \eqref{subsec:shift_move_limitations} the basic move was limiting for our simulateds annelaing algoritth. I wasnt able to comortabhly find optimal soltuions withing in the cooling scheudlue. From the bwloe fignires for a typical result the basci shift move would had a cost reduction from 156 to 150 after 10,000 itteration. leading to a result with with no real noticeable change  see figure
+
+
 
 \subsection{Comparison of Optimised Paths}
 
@@ -486,13 +615,7 @@ c_{\max}=0.8.
 % the objective function.
 
 
-\subsection{Performance of the Neighbourhood Moves}
 
-% Compare the performance of the basic shift move and segmented shift
-% move where appropriate.
-%
-% Discuss differences in the algorithm's ability to explore the
-% solution space and obtain lower-cost paths.
 
 
 \subsection{Variability Between Runs}
