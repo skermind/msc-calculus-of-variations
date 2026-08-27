@@ -589,22 +589,130 @@ configurations compared with the basic shift move.
 
 \section{Numerical Results and Discussion}
 
-In this section I will discuss the numerical results of the simulated annealing process with the effect of the choice of paramiters for the alongside the evidence showing the need for the segmented shift move. This simuation is fairly abstract but it shows that when minimising the cost of path where legth, terran and curvcertuire effect the cost we get a non-trivial result. Animations showing the evolution of the candidate path during the simulated annealing procedure are available in the accompanying GitHub repository \cite{skerman2026calculus}.
+This section presents and discusses the numerical results obtained using
+the simulated annealing algorithm. Particular attention is given to the
+effect of the algorithmic parameters and to the motivation for the
+segmented shift move. Although the simulation represents an abstract
+path-planning problem, it demonstrates that balancing terrain cost,
+path length, and curvature can produce non-trivial optimal paths.
+
+Animations showing the evolution of the candidate path during the
+simulated annealing procedure are available in the accompanying GitHub
+repository \cite{skerman2026calculus}.
+
+We initially consider only the terrain cost term in the objective
+functional,
+\[
+J(\gamma)
+=
+\int_\gamma
+w_c c(x,y)\,ds.
+\]
+The numerical experiments in this section begin with this simplified formulation before progressively introducing the additional curvature and length terms required for the full model problem given in Equation~\eqref{eq:ModelProblem}. This allows the effect of each component of the objective functional to be investigated separately.
 
 \subsection{Performance of the Neighbourhood Moves}
 
-I'd like to start with proving envidence for the non standard use of a segmented shift move with move preferance weighted to the cost of the segments that is being moved. As discussed in the previous section \eqref{subsec:shift_move_limitations} the basic move was limiting for our simulateds annelaing algoritth. I wasnt able to comortabhly find optimal soltuions withing in the cooling scheudlue. From the bwloe fignires for a typical result the basci shift move would had a cost reduction from 156 to 150 after 10,000 itteration. leading to a result with with no real noticeable change  see figure
+The first objective of these numerical experiments was to investigate
+the effectiveness of the neighbourhood construction and, in particular,
+to examine the motivation for using a cost-weighted segmented shift
+move. As discussed in Section~\ref{subsec:shift_move_limitations}, the
+basic shift move was limited by its ability to make substantial changes
+to the geometry of the path. Since only a single waypoint was moved at
+each iteration, the algorithm could require many iterations to move the
+path around a region of high terrain cost.
 
+Figures~\ref{fig:basic_move_cost} and \ref{fig:basic_move_path} show a
+typical result obtained using the basic shift move. Over $10{,}000$
+iterations, the path cost decreased from approximately $156$ to $150$.
+The resulting path therefore showed only a relatively small improvement
+from the initial configuration, with no substantial change in the
+overall geometry of the path.
 
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/BasicMoveCostAnalysis.png}
+        \caption{Evolution of the path cost using the basic shift move.}
+        \label{fig:basic_move_cost}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/BasicMovePathResult.png}
+        \caption{Final path obtained using simulated annealing with the basic shift move.}
+        \label{fig:basic_move_path}
+    \end{minipage}
+    
+\end{figure}
 
-\subsection{Comparison of Optimised Paths}
+These observations motivated the development and experimentation of the cost-weighted segmented shift move described in Section~\ref{subsec:segmented_shift}. Keeping the remaining parameters the same, while allowing a greater number of iterations, the segmented move produced a substantially larger reduction in the objective cost. As shown in Figure~\ref{fig:segment_move_cost}, the cost decreased from approximately $156$ to $10$.The corresponding final path, shown in Figure~\ref{fig:segment_move_path}, is able to move around the region of high terrain cost.
 
-% Present and compare the paths obtained for the different model
-% configurations.
-%
-% Use figures to illustrate the paths and their relationship to the
-% terrain.
+It should be noted that this experiment was conducted before the
+curvature and length penalties were introduced into the objective
+functional. Consequently, the resulting path is relatively long and
+contains sharp changes in direction. Nevertheless, these results
+demonstrate the improved ability of the segmented shift move to produce
+large-scale changes in the path geometry and explore alternative
+regions of the solution space. An animation of this optimisation
+process is available in the accompanying GitHub repository
+\cite{skerman2026calculus}.
 
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/SegmentMoveCostAnalysis.png}
+        \caption{Evolution of the path cost using the segmented shift move.}
+        \label{fig:segment_move_cost}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/SegmentMoveCostResult.png}
+        \caption{Final path obtained using simulated annealing with the segmented shift move.}
+        \label{fig:segment_move_path}
+    \end{minipage}
+    
+\end{figure}
+
+\subsection{Add Curvature to Model}
+
+Following the experiments and then decisions around using the weighted segmented shift move I slowly built up to our objective function \eqref{eq:ModelProblem}. First we added curveture penalties into the model to give an objextive function of,
+\[
+J(\gamma)
+=
+\int_\gamma
+\left[
+w_c c(x,y)
++
+\lambda\kappa^2
+\right]\,ds.
+\]
+I would experiment with the weights to try and find a result that looks approximately what i would expect blow you will see the rsults of three experiments testing for $\lambda = \{1,5,20\}$. In the table we compare the costs of the inttial stright line to the final results with differing values for $\lambda$. Initally the curveture cost is so low at $1.56 \times 10^{-26}$ almost zero. We'd expect this from a stright line. In this case the weights that gave an result that looks like we'd expect were $(w_c,\lambda) = (1,5)$. This was encouge the model to find a smoother path. 
+
+\begin{table}[H]
+    \centering
+    \caption{Effect of the curvature weighting parameter $\lambda$ on
+    the terrain and curvature costs.}
+    \label{tab:lambda_results}
+    \begin{tabular}{lrrrr}
+        \hline
+        & Initial & $\lambda=1$ & $\lambda=5$ & $\lambda=20$ \\
+        \hline
+        Terrain Cost
+        & 156.097 & 143.887 & 147.081 & 155.249 \\
+        
+        Curvature Cost
+        & $1.56\times10^{-26}$ & 0.278 & 0.271 & 0.0191 \\
+        
+        Total
+        & 156.097 & 144.165 & 147.352 & 155.268 \\
+        \hline
+    \end{tabular}
+\end{table}
 
 \subsection{Effect of Model Parameters}
 
