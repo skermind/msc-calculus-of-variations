@@ -678,9 +678,11 @@ process is available in the accompanying GitHub repository
     
 \end{figure}
 
-\subsection{Add Curvature to Model}
+\subsection{Adding Curvature to the Model}
+\label{subsec:adding_curvature} 
 
-Following the experiments and then decisions around using the weighted segmented shift move I slowly built up to our objective function \eqref{eq:ModelProblem}. First we added curveture penalties into the model to give an objextive function of,
+Following the experiments with the neighbourhood moves, the objective functional was progressively extended towards the full model problem \eqref{eq:ModelProblem}. The first additional term considered was the curvature penalty, giving
+
 \[
 J(\gamma)
 =
@@ -691,7 +693,8 @@ w_c c(x,y)
 \lambda\kappa^2
 \right]\,ds.
 \]
-I would experiment with the weights to try and find a result that looks approximately what i would expect blow you will see the rsults of three experiments testing for $\lambda = \{1,5,20\}$. In the table we compare the costs of the inttial stright line to the final results with differing values for $\lambda$. Initally the curveture cost is so low at $1.56 \times 10^{-26}$ almost zero. We'd expect this from a stright line. In this case the weights that gave an result that looks like we'd expect were $(w_c,\lambda) = (1,5)$. This was encouge the model to find a smoother path. 
+
+The purpose of introducing this term was to investigate how penalising curvature affects the resulting path. In particular, the weighting parameter $\lambda$ controls the relative importance of path smoothness compared with the terrain cost. Three values weren considered, $\lambda\in\{1,5,20\}$, while keeping the other parameters fixed. The resulting costs are shown in Table~\ref{tab:lambda_results}.
 
 \begin{table}[H]
     \centering
@@ -714,17 +717,96 @@ I would experiment with the weights to try and find a result that looks approxim
     \end{tabular}
 \end{table}
 
-\subsection{Effect of Model Parameters}
+For the initial straight-line path, the curvature cost is $1.56\times10^{-26}$, which is effectively zero as expected for a straight path. For $\lambda=1$ and $\lambda=5$, the total costs are  similar, with values of $144.165$ and $147.352$, respectively. In both cases, the reduction in terrain cost is sufficiently large that the curvature contribution remains relatively small. For $\lambda=20$, the curvature cost is reduced to approximately $0.0191$, compared with $0.278$ and $0.271$ for $\lambda=1$ and $\lambda=5$, respectively. This corresponds to a reduction of over an order of magnitude in the curvature contribution. At the same time, the terrain cost increases to $155.249$, indicating that the larger value of $\lambda$ causes the optimisation to prioritise smoothness over avoiding the high-cost region.
 
-% Analyse the effect of changing the terrain, curvature and length
-% weights.
-%
-% Discuss the trade-offs observed between the different components of
-% the objective function.
+The effect of this change can also be seen in the resulting paths in Figures~\ref{fig:lambda=1Results}, \ref{fig:lambda=5Results}, and \ref{fig:lambda=20Results}. For $\lambda=1$ and $\lambda=5$, the resulting paths pass through the higher-cost region while maintaining a relatively smooth trajectory. In contrast, $\lambda=20$ places a much stronger penalty on curvature and produces a path which remains close to the initial straight-line configuration. This demonstrates that the curvature weighting is influencing the optimisation as intended, while also illustrating the trade-off between terrain cost and path smoothness.
 
 
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=1Analysis.png}
+        \caption{$\lambda = 1$}
+        \label{fig:lambda=1Analysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=5Analysis.png}
+        \caption{$\lambda = 5$}
+        \label{fig:lambda=5Analysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=20Analysis.png}
+        \caption{$\lambda = 20$}
+        \label{fig:lambda=20Analysis}
+    \end{minipage}
+    
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=1Results.png}
+        \caption{$\lambda = 1$}
+        \label{fig:lambda=1Results}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=5Results.png}
+        \caption{$\lambda = 5$}
+        \label{fig:lambda=5Results}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=20Results.png}
+        \caption{$\lambda = 20$}
+        \label{fig:lambda=20Results}
+    \end{minipage}
+    
+\end{figure}
 
+\subsection{Adding Lenght to the Model}
+
+We now move onto the final verison of the model with the full equation as described in \eqref{eq:ModelProblem}
+\[
+J(\gamma)
+=
+\int_\gamma
+\left[
+w_c c(x,y)
++
+\lambda\kappa^2
++
+\mu
+\right]\,ds.
+\]
+We are now able to control the ways these cost functions interact with one another by influencing the weight values $(w_c,\lambda,\mu)$. By striking a balance between these we are able to get some satifieing results. Smooth paths that skirt around the hill, but not nessersarlyl completlyt avoid it. From experimenmtation I found that using weightings of $(w_c,\lambda,\mu) = (2,20,1)$ produced a good result as we can see in \ref{fig:basic_move_cost}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/SegmentMoveCostAnalysis.png}
+        \caption{Evolution of the path cost using the segmented shift move.}
+        \label{fig:segment_move_cost}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/SegmentMoveCostResult.png}
+        \caption{Final path obtained using simulated annealing with the segmented shift move.}
+        \label{fig:segment_move_path}
+    \end{minipage}
+    
+\end{figure}
 
 \subsection{Variability Between Runs}
 
