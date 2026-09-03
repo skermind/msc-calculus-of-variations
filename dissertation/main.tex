@@ -26,9 +26,9 @@
 \newtheorem{theorem}{Theorem}[chapter]
 
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}[chapter]
-\newtheorem{example}{Example}[chapter]
-\newtheorem{remark}{Remark}[chapter]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
 
 \title{MSc Mathematics Dissertation}
 \author{Daniel Skerman}
@@ -43,17 +43,18 @@
 \chapter{Introduction}
 \input{chapters/introduction}
 
-\chapter{Mathematical Modelling}
-\input{chapters/mathematical_modelling}
+\chapter{Preliminaries}
+\input{dissertation/chapters/preliminaries}
 
 \chapter{The Direct Method}
 \input{chapters/direct_method}
 
+\chapter{Mathematical Modelling}
+\input{chapters/mathematical_modelling}
+
+
 \chapter{Numerical Methods}
 \input{chapters/numerical_methods}
-
-\chapter{Results}
-\input{chapters/results}
 
 \chapter{Discussion and Future Work}
 \input{chapters/conclusion}

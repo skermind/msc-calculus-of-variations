@@ -2,219 +2,12 @@
 
 In this chapter, we describe and evaluate the results of a numerical investigation into the optimisation of paths over a cost field. The numerical model aims to balance three competing objectives: the cost of traversing the terrain, the total length of the path, and its curvature. As discussed in the previous chapter, a useful interpretation of this problem is the placement of a railway track, where it is desirable to minimise the cost of the terrain through which the track passes while also keeping the total length and curvature of the track within reasonable bounds.
 
-We consider the same model problem to which the Direct Method was applied in the previous chapter, given by \eqref{eq:ModelProblem}. For completeness, we first recall the formulation of this problem before introducing its numerical approximation.
+We consider the same model problem to which the Direct Method was applied in the previous chapter, given by \eqref{eq:ModelProblem}.
 
 We then describe the numerical method used to obtain approximate minimisers of the functional. The optimisation is performed using simulated annealing, with a segmented shift move used to generate neighbouring paths. This stochastic approach allows the algorithm to explore the space of admissible paths while providing the possibility of escaping local minima. We then describe the discretisation of the model problem and its implementation in Python, before presenting and analysing the numerical results obtained.
 
 The complete source code and computational results used in this chapter are publicly available in the accompanying GitHub repository \cite{skerman2026calculus}.
 
-\section{Formulation of the Model Problem}
-\label{sec:model_problem}
-
-In this chapter, we consider the numerical approximation of the terrain
-path-planning problem introduced in the previous chapter. The objective
-is to determine an admissible path which balances three competing
-considerations: the cost of traversing the terrain, the smoothness of
-the path, and its overall length.
-
-Let $\Omega \subset \mathbb{R}^2$ denote the domain representing the
-terrain, and let $a,b \in \Omega$ denote the prescribed start and end
-points, respectively. An admissible path is represented by a
-sufficiently smooth curve
-\[
-\gamma : [0,1] \rightarrow \mathbb{R}^2,
-\]
-satisfying the boundary conditions
-\[
-\gamma(0)=a,
-\qquad
-\gamma(1)=b.
-\]
-The collection of admissible curves satisfying these boundary
-conditions, together with any additional constraints imposed by the
-terrain, is denoted by $\Gamma$.
-
-The terrain is described by a cost field
-\[
-c:\Omega\rightarrow\mathbb{R},
-\]
-where $c(x,y)$ represents the cost associated with traversing the
-terrain at the point $(x,y)$. In the simplest formulation, the cost of
-a path is given by
-\begin{equation}
-J_{\mathrm{terrain}}(\gamma)
-=
-\int_\gamma c(x,y)\,ds.
-\label{eq:terrain_functional}
-\end{equation}
-This functional accounts for both the cost of the terrain encountered
-by the path and the distance travelled through each region.
-
-In order to incorporate additional considerations relevant to the
-path-planning problem, penalties for curvature and total path length
-are introduced. The resulting functional is written in the compact
-form
-\begin{equation}
-\boxed{
-J(\gamma)
-=
-\int_\gamma
-\left[
-w_c c(x,y)
-+
-\lambda\kappa^2
-+
-\mu
-\right]\,ds
-}
-\label{eq:ModelProblem}
-\end{equation}
-where $w_c$, $\lambda$, and $\mu$ are non-negative parameters controlling
-the relative contribution of the terrain cost, curvature, and length,
-respectively.
-
-The first term in the integrand,
-\[
-w_c c(x,y),
-\]
-represents the cost associated with traversing the terrain. The
-parameter $w_c$ allows the contribution of the terrain cost to be
-scaled relative to the additional penalties.
-
-The second term,
-\[
-\lambda\kappa^2,
-\]
-penalises curvature. In particular, the square of the curvature assigns
-increasingly greater cost to regions of the path with large curvature,
-thereby discouraging sharp changes in direction and favouring smoother
-paths.
-
-Finally, the constant term $\mu$ represents a penalty on the total
-length of the path. Since
-\[
-L(\gamma)=\int_\gamma 1\,ds,
-\]
-the contribution of this term to the functional is
-\[
-\mu\int_\gamma 1\,ds
-=
-\mu L(\gamma).
-\]
-Consequently, the functional in \eqref{eq:ModelProblem} can equivalently
-be written as
-\begin{equation}
-J(\gamma)
-=
-w_c\int_\gamma c(x,y)\,ds
-+
-\lambda\int_\gamma\kappa^2\,ds
-+
-\mu L(\gamma).
-\label{eq:expanded_model}
-\end{equation}
-
-The corresponding variational problem is therefore
-\begin{equation}
-\inf_{\gamma\in\Gamma} J(\gamma).
-\label{eq:extended_problem}
-\end{equation}
-
-The three terms in \eqref{eq:ModelProblem} introduce a trade-off between
-terrain cost, path smoothness, and path length. Increasing $w_c$
-favours paths which avoid regions of high terrain cost, while increasing
-$\lambda$ places greater emphasis on smoothness. Similarly, increasing
-$\mu$ makes longer paths increasingly expensive and therefore favours
-shorter routes. The numerical investigation that follows seeks to
-understand how these competing terms influence the resulting
-approximate minimisers.
-
-\subsection{Arc Length and Path Length}
-\label{subsec:arc_length}
-
-Let the curve $\gamma$ be parametrised by
-\[
-\gamma(t)=(x(t),y(t)),
-\qquad t\in[0,1].
-\]
-The length of the curve is given by
-\begin{equation}
-L(\gamma)
-=
-\int_0^1
-\|\gamma'(t)\|\,dt.
-\label{eq:path_length}
-\end{equation}
-
-More generally, the arc length measured from $\gamma(0)$ to
-$\gamma(t)$ is
-\begin{equation}
-s(t)
-=
-\int_0^t
-\|\gamma'(\tau)\|\,d\tau.
-\label{eq:arc_length}
-\end{equation}
-
-Thus, an integral with respect to arc length can be expressed in terms
-of the parameter $t$ according to
-\begin{equation}
-\int_\gamma f(x,y)\,ds
-=
-\int_0^1
-f(\gamma(t))
-\|\gamma'(t)\|\,dt.
-\label{eq:line_integral}
-\end{equation}
-
-In particular, the terrain component of the functional can be written
-as
-\begin{equation}
-\int_\gamma c(x,y)\,ds
-=
-\int_0^1
-c(\gamma(t))
-\|\gamma'(t)\|\,dt.
-\end{equation}
-
-\subsection{Curvature Penalty}
-\label{subsec:curvature_penalty}
-
-The curvature of a curve measures the rate at which its direction
-changes with respect to arc length. When $\gamma$ is parametrised by
-arc length $s$, the tangent vector satisfies
-\[
-\left\|\frac{d\gamma}{ds}\right\|=1,
-\]
-and the curvature is given by
-\begin{equation}
-\kappa(s)
-=
-\left\|
-\frac{d^2\gamma}{ds^2}
-\right\|.
-\label{eq:curvature_arclength}
-\end{equation}
-
-The curvature contribution to the functional is consequently
-\begin{equation}
-J_{\mathrm{curvature}}(\gamma)
-=
-\int_\gamma \kappa^2\,ds.
-\label{eq:curvature_functional}
-\end{equation}
-
-The use of $\kappa^2$ ensures that curvature is penalised independently
-of its direction, while placing a greater penalty on regions where the
-path bends sharply. This provides a mechanism for controlling the
-smoothness of the resulting path.
-
-The formulation in \eqref{eq:ModelProblem} therefore provides a
-mathematical representation of the competing requirements of the
-path-planning problem. In the following sections, this continuous
-variational problem is discretised and implemented computationally,
-allowing approximate minimisers to be obtained using simulated
-annealing.
 
 \section{Numerical Discretisation} 
 
@@ -241,7 +34,7 @@ $(x_c,y_c)$, radius $r$, and peak cost $c_{\max}$. Let
 \[
 d(x,y)
 =
-\sqrt{(x-x_c)^2+(y-y_c)^2}
+\sqrt{(x-x_c)^2+(y-y_c)^2},
 \]
 denote the distance from $(x,y)$ to the centre of the hill. The terrain
 cost within the specified radius is then given by
@@ -260,12 +53,11 @@ where
 \[
 \sigma=\frac{r}{3}.
 \]
+
 The Gaussian profile produces the maximum cost at the centre of the
 hill, with the cost decreasing smoothly towards the edge of its
 specified radius. Outside this radius, the hill has no effect on the
-background terrain cost.
-
-For the terrain shown in Figure~\ref{fig:hill_terrain}, the parameters
+background terrain cost. For the terrain shown in Figure~\ref{fig:hill_terrain}, the parameters
 used are
 \[
 (x_c,y_c)=(50,50),
@@ -353,7 +145,6 @@ This provides a numerical approximation to the terrain term
 \[
 \int_\gamma c(x,y)\,ds.
 \]
-
 The length of the discrete path is calculated as
 \begin{equation}
 C_{\mathrm{length}}(\gamma_h)
@@ -365,8 +156,7 @@ C_{\mathrm{length}}(\gamma_h)
 which provides an approximation to the continuous path length
 $L(\gamma)$.
 
-Finally, the curvature contribution is estimated using the second
-finite difference of three consecutive path points:
+Finally, the curvature contribution is estimated using the second finite difference of three consecutive path points:
 \begin{equation}
 q_i
 =
@@ -385,6 +175,7 @@ p_{i+1}-2p_i+p_{i-1}
 \right\|^2.
 \label{eq:discrete_curvature_cost}
 \end{equation}
+
 Straight sections of the path give a zero contribution, while sharper
 changes in direction produce a larger penalty. This provides a simple
 substiution for the continuous curvature term
@@ -436,8 +227,7 @@ higher cost may also be accepted according to the acceptance criterion
 described below. After each iteration, the temperature is reduced
 according to the chosen cooling schedule. Throughout the optimisation,
 the lowest-cost path encountered is stored as the best solution.
-\\
-\\
+
 The main steps of the algorithm can therefore be summarised as:
 \begin{enumerate}
     \item Initialise the algorithm with a feasible path.
@@ -466,10 +256,7 @@ J_{\mathrm{candidate}}
 -
 J_{\mathrm{current}}.
 \label{eq:cost_difference}
-\end{equation}
-
-If $\Delta J<0$, the candidate has a lower cost and is accepted. If
-$\Delta J\geq0$, the candidate may still be accepted with probability
+\end{equation} If $\Delta J<0$, the candidate has a lower cost and is accepted. If $\Delta J\geq0$, the candidate may still be accepted with probability
 \begin{equation}
 P(\mathrm{accept})
 =
@@ -649,7 +436,7 @@ overall geometry of the path.
 
 These observations motivated the development and experimentation of the cost-weighted segmented shift move described in Section~\ref{subsec:segmented_shift}. Keeping the remaining parameters the same, while allowing a greater number of iterations, the segmented move produced a substantially larger reduction in the objective cost. As shown in Figure~\ref{fig:segment_move_cost}, the cost decreased from approximately $156$ to $10$.The corresponding final path, shown in Figure~\ref{fig:segment_move_path}, is able to move around the region of high terrain cost.
 
-It should be noted that this experiment was conducted before the
+Recall that this experiment was conducted before the
 curvature and length penalties were introduced into the objective
 functional. Consequently, the resulting path is relatively long and
 contains sharp changes in direction. Nevertheless, these results
@@ -855,15 +642,10 @@ weights. However, the initial straight-line path has an almost zero
 curvature cost. Consequently, the value of $K_0$ is extremely small,
 causing the normalised curvature term
 \[
-\frac{\lambda}{K_0}K(\gamma)
+\frac{\lambda}{K_0}K(\gamma),
 \]
 to become disproportionately large and preventing a meaningful
-balance between the three terms.
-
-To address this, the initial path was first subjected to $50$ random
-segmented shift moves. This produced a reference path with a larger
-curvature cost, allowing the three components to be normalised without
-the curvature term dominating the objective.
+balance between the three terms. To address this, the initial path was first subjected to $50$ random segmented shift moves. This produced a reference path with a larger curvature cost, allowing the three components to be normalised without the curvature term dominating the objective.
 
 For the example considered, the resulting weights were
 \[
