@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
+                "file": "Preliminaries/1.5 Convex Analysis.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "2026-06-15 - Supervision 1 - Initial Discussion.md"
+              "title": "1.5 Convex Analysis"
             }
           }
         ]
@@ -188,25 +188,26 @@
   },
   "active": "7ee26ecfe9c8c1c5",
   "lastOpenFiles": [
-    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
-    "TheDirectMethod/3.2 The Model Case.md",
     "Preliminaries/1.4 Sobolev Spaces.md",
+    "Preliminaries/1.5 Convex Analysis.md",
+    "Supervision Meetings/Supervision Meetings.md",
+    "TheDirectMethod/3.1 Introduction.md",
+    "TheDirectMethod/3.2 The Model Case.md",
     "TheDirectMethod/3.3 A General Existence Theorem.md",
     "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
     "TheDirectMethod/TheDirectMethod.md",
+    "ReadingList/Kielhöfer/HansjörgKielhöfer_CalculusofVariations_Book.pdf",
+    "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
+    "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
     "Word Count Tracker.md",
     "Preliminaries/1.3 Lp spaces.md",
     "ReadingList/Dacorogna/BernardDacorogna_IntroToTheCalculusOfVariations_Book.pdf",
     "Preliminaries/1.2 Continuous and Hölder continuous functions.md",
-    "ReadingList/Kielhöfer/HansjörgKielhöfer_CalculusofVariations_Book.pdf",
     "ReadingList/Santambrogio/FilippoSantambrogio_ACourseintheCalculusofVariations_Book.pdf",
-    "TheDirectMethod/3.1 Introduction.md",
     "Preliminaries/Preliminaries.md",
-    "Preliminaries/1.5 Convex Analysis.md",
     "ReadingList/Dacorogna/Dacorogna Note.md",
     "2026-08-10.md",
     "Untitled 1.base",
-    "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
     "Plan/Model.md",
     "Plan/Personal Motivations and Inital Plan.md",
     "Nomenclature.md",
@@ -217,7 +218,6 @@
     "TheDirectMethod",
     "2026-06-24.md",
     "Preliminaries",
-    "Supervision Meetings/Supervision Meetings.md",
     "ReadingList/Santambrogio/Santambrogio Note.md",
     "ReadingList/Kielhöfer/Kielhöfer Note.md",
     "Personal Motivations and Initial Plan.md",
