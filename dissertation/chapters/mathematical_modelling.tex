@@ -1,0 +1,247 @@
+\section{Formulation of the Model Problem}
+\label{sec:model_problem}
+
+{\color{red} write intro to section}
+
+Let $\Omega \subset \mathbb{R}^2$ denote the domain representing the
+terrain, and let $a,b \in \Omega$ denote the prescribed start and end
+points, respectively. An admissible path is represented by a
+sufficiently smooth curve
+\[
+\gamma : [0,1] \rightarrow \mathbb{R}^2,
+\]
+satisfying the boundary conditions
+\[
+\gamma(0)=a,
+\qquad
+\gamma(1)=b.
+\]
+The collection of admissible curves satisfying these boundary
+conditions, together with any additional constraints imposed by the
+terrain, is denoted by $\Gamma$.
+
+The terrain is described by a cost field
+\[
+c:\Omega\rightarrow\mathbb{R},
+\]
+where $c(x,y)$ represents the cost associated with traversing the
+terrain at the point $(x,y)$. In the simplest formulation, the cost of
+a path is given by
+\begin{equation}
+J_{\mathrm{terrain}}(\gamma)
+=
+\int_\gamma c(x,y)\,ds.
+\label{eq:terrain_functional}
+\end{equation}
+This functional accounts for both the cost of the terrain encountered
+by the path and the distance travelled through each region.
+
+In order to incorporate additional considerations relevant to the
+path-planning problem, penalties for curvature and total path length
+are introduced. The resulting functional is written in the compact
+form
+\begin{equation}
+\boxed{
+J(\gamma)
+=
+\int_\gamma
+\left[
+w_c c(x,y)
++
+\lambda\kappa^2
++
+\mu
+\right]\,ds
+}
+\label{eq:ModelProblem}
+\end{equation}
+where $w_c$, $\lambda$, and $\mu$ are non-negative parameters controlling
+the relative contribution of the terrain cost, curvature, and length,
+respectively.
+
+The first term in the integrand,
+\[
+w_c c(x,y),
+\]
+represents the cost associated with traversing the terrain. The
+parameter $w_c$ allows the contribution of the terrain cost to be
+scaled relative to the additional penalties.
+
+The second term,
+\[
+\lambda\kappa^2,
+\]
+penalises curvature. In particular, the square of the curvature assigns
+increasingly greater cost to regions of the path with large curvature,
+thereby discouraging sharp changes in direction and favouring smoother
+paths.
+
+Finally, the constant term $\mu$ represents a penalty on the total
+length of the path. Since
+\[
+L(\gamma)=\int_\gamma 1\,ds,
+\]
+the contribution of this term to the functional is
+\[
+\mu\int_\gamma 1\,ds
+=
+\mu L(\gamma).
+\]
+Consequently, the functional in \eqref{eq:ModelProblem} can equivalently
+be written as
+\begin{equation}
+J(\gamma)
+=
+w_c\int_\gamma c(x,y)\,ds
++
+\lambda\int_\gamma\kappa^2\,ds
++
+\mu L(\gamma).
+\label{eq:expanded_model}
+\end{equation}
+
+The corresponding variational problem is therefore
+\begin{equation}
+\inf_{\gamma\in\Gamma} J(\gamma).
+\label{eq:extended_problem}
+\end{equation}
+
+The three terms in \eqref{eq:ModelProblem} introduce a trade-off between
+terrain cost, path smoothness, and path length. Increasing $w_c$
+favours paths which avoid regions of high terrain cost, while increasing
+$\lambda$ places greater emphasis on smoothness. Similarly, increasing
+$\mu$ makes longer paths increasingly expensive and therefore favours
+shorter routes. The numerical investigation that follows seeks to
+understand how these competing terms influence the resulting
+approximate minimisers.
+
+\subsection{Arc Length and Path Length}
+\label{subsec:arc_length}
+
+Let the curve $\gamma$ be parametrised by
+\[
+\gamma(t)=(x(t),y(t)),
+\qquad t\in[0,1].
+\]
+The length of the curve is given by
+\begin{equation}
+L(\gamma)
+=
+\int_0^1
+\|\gamma'(t)\|\,dt.
+\label{eq:path_length}
+\end{equation}
+
+More generally, the arc length measured from $\gamma(0)$ to
+$\gamma(t)$ is
+\begin{equation}
+s(t)
+=
+\int_0^t
+\|\gamma'(\tau)\|\,d\tau.
+\label{eq:arc_length}
+\end{equation}
+
+Thus, an integral with respect to arc length can be expressed in terms
+of the parameter $t$ according to
+\begin{equation}
+\int_\gamma f(x,y)\,ds
+=
+\int_0^1
+f(\gamma(t))
+\|\gamma'(t)\|\,dt.
+\label{eq:line_integral}
+\end{equation}
+
+In particular, the terrain component of the functional can be written
+as
+\begin{equation}
+\int_\gamma c(x,y)\,ds
+=
+\int_0^1
+c(\gamma(t))
+\|\gamma'(t)\|\,dt.
+\end{equation}
+
+\subsection{Curvature Penalty}
+\label{subsec:curvature_penalty}
+
+The curvature of a curve measures the rate at which its direction
+changes with respect to arc length. When $\gamma$ is parametrised by
+arc length $s$, the tangent vector satisfies
+\[
+\left\|\frac{d\gamma}{ds}\right\|=1,
+\]
+and the curvature is given by
+\begin{equation}
+\kappa(s)
+=
+\left\|
+\frac{d^2\gamma}{ds^2}
+\right\|.
+\label{eq:curvature_arclength}
+\end{equation}
+
+The curvature contribution to the functional is consequently
+\begin{equation}
+J_{\mathrm{curvature}}(\gamma)
+=
+\int_\gamma \kappa^2\,ds.
+\label{eq:curvature_functional}
+\end{equation}
+
+The use of $\kappa^2$ ensures that curvature is penalised independently
+of its direction, while placing a greater penalty on regions where the
+path bends sharply. This provides a mechanism for controlling the
+smoothness of the resulting path.
+
+The formulation in \eqref{eq:ModelProblem} therefore provides a
+mathematical representation of the competing requirements of the
+path-planning problem. In the following sections, this continuous
+variational problem is discretised and implemented computationally,
+allowing approximate minimisers to be obtained using simulated
+annealing.
+
+\section{Euler-Lagrange Equations}
+
+{\color{red} This is just to dot down some maths before discussiuoins are proper write up}
+
+First investigate the problem in terms of $s$ instead of $x,y$ we can rewrite the \eqref{eq:ModelProblem} as 
+\begin{equation}
+    \label{eq:ModelPrblem_s}
+    J[\gamma] = \int_{s_0}^{s_1} c(\gamma(s)) + \lambda|\gamma''(s)|^2 + \mu \, ds.
+\end{equation}
+
+Using the Second order Euler Ladgrange Equation {\color{red} referance this}
+\[
+\frac{\partial F}{\partial\gamma} - \frac{d}{ds}\left[\frac{\partial F}{\partial\gamma'}\right] + \frac{d^2}{d^2s}\left[\frac{\partial F}{\partial\gamma''}\right] = 0
+\]
+
+we are left with 
+\begin{equation}
+    \label{eq:ModelProblem_EL_Solution}
+    \gamma^{(4)}(s) = -\frac{1}{2\lambda} \nabla_{\gamma} c(\gamma(s))
+\end{equation}
+
+{\color{red} I'm a bit lost on how to solve this or what we can get form this}
+
+{\color{red} I did have a go with a hill function for c}
+
+to mimic the python code let $c(s)$ be {\color{red} I will re order so the python code mimics this}
+\begin{equation}
+    \label{eq:hill_C}
+    c(\gamma(s)) = He^{-\frac{|\gamma(s) - p|^2}{2\sigma^2}}
+\end{equation} 
+Where $H$ is hil magnitude (as in the differance between max cost and backgound cost, $p$ is centrepoint of the hill, and $\sigma$ is the spead of the hill,
+\[
+H = c_{max} - c_0 
+\]
+\[
+p=(s_c) = (x_c,y_c)
+\]
+subing this $c$ into \eqref{eq:ModelProblem_EL_Solution} gives
+\[
+    \gamma^{(4)}(s) = \frac{H}{2\lambda\sigma^2} e^{-\frac{|\gamma(s) - p|^2}{2\sigma^2}}(\gamma(s) - p)
+\]
+
+Since this is a 4th order non linear ODE we can see that typciall analyticval methods cant help us and a different method is required.
