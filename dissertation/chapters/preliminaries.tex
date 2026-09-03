@@ -1,6 +1,6 @@
 In this chapter, we introduce the foundational mathematics required for the study of the Calculus of Variations. The Classical Method leads to the Euler–Lagrange equation, which transforms a variational problem into an ordinary differential equation. Although the Classical Method is not the primary focus of this dissertation, an understanding of this approach provides useful motivation for the development of the Direct Method.
 
-The Direct Method relies on several results from Functional Analysis, alongside an understanding of $L^p$ and Sobolev spaces. Convexity is also an important tool in analysing variational problems and understanding the properties of their solutions. These concepts provide the mathematical framework required to establish the existence of minimisers using the Direct Method. Establishing existence before applying a numerical method is particularly useful, as it allows us to determine whether a variational problem admits a minimiser before attempting to approximate one computationally.
+The Direct Method relies on several results from Functional Analysis, alongside an understanding of $L^p$ and Sobolev spaces. Convexity is also an important tool in analysing variational problems and understanding the properties of their solutions. These concepts provide the mathematical framework required to establish the existence of minimisers using the Direct Method. Establishing existence before applying a numerical method is particularly useful, as it allows us to determine whether a variational problem admits a minimiser before attempting to approximate one computationally. Finally we will define and show some examples for the direct method, this will be used in the next chapter on our model problem.
 
 We now formulate the general form of a Calculus of Variations problem. Throughout this dissertation, we focus primarily on minimisation problems. A general model problem can be written in the form
 \begin{equation}
@@ -1091,7 +1091,7 @@ Hence \(u=0\) almost everywhere in \(\Omega\), as required.
 \end{proof}
 
 \section{Sobolev Spaces}
-
+\label{sec:Sobolev_Spaces}
 In this section, we introduce Sobolev spaces, commonly denoted by \(W^{k,p}(\Omega)\), where \(1\leq p\leq\infty\) and \(k\in\mathbb{N}\). We weaken the notion of differentiation so that we can work with functions that are not necessarily classically differentiable, while retaining the ability to integrate by parts. This is particularly useful in the Direct Method, where we need to control both a function and its derivatives. We begin by introducing weak derivatives before defining Sobolev spaces and giving some examples for intuition. For further reading, see Dacorogna~\cite[p.~30]{dacorogna}.
 
 \subsubsection{Weak Partial Derivative}
@@ -1448,6 +1448,18 @@ we conclude that
 This example shows that increasing $k$ asks for stronger regularity on a function. Even though $u(x)=|x|$ has a weak first derivative and belongs to $W^{1,p}(-1,1)$, it does not allow a second weak derivative in $L^p(-1,1)$ and so it cannot belong to any $W^{k,p}(-1,1)$ with $k>1$.
 \end{example}
 
+\subsection{Poincar\'e Inequality}
+
+\begin{theorem}
+    \label{thm:Poincare Inequality}
+    Let $\Omega \subset \mathbb{R}^n$ be a bounded open set and $1\leq p \leq \infty$. Then there exists $\gamma = \gamma(\Omega,p) > 0$  so that, 
+    $$
+        \|u\|_{L^p \text{ or } W^{1,p}} \le \gamma\|\nabla u\|_{L^p}
+        \, \quad \forall u \in W^{1,p}_0.
+    $$
+\end{theorem}
+For a proof, see Dacorogna~\cite[p.~45]{dacorogna}.
+
 \section{Convex Analysis}
 
 Convex analysis is a broad area of mathematics, so this section focuses only on the concepts relevant to the Direct Method. We introduce the definition of convex set, convex functions, and some conditions, alongside examples to illustrate these ideas.
@@ -1517,5 +1529,337 @@ Hence the convexity inequality holds, and therefore
 $$
     f(x)=|x|^2
 $$
-is convex.
+is convex. 
+
+We can also verify this visually, as illustrated in Figure~\ref{fig:convex_function}, it can be observed that the function $f(x)=|x|^2$ is convex.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{numerical/outputs/convex_function.pdf}
+    \caption{
+        The function $f(x)=|x|^2$, with a chord illustrating its convexity.
+    }
+    \label{fig:convex_function}
+\end{figure}
+
 \end{example}
+
+\subsection{Convexity Conditions}
+
+\begin{theorem}
+    Let $f:\mathbb{R}^n \rightarrow \mathbb{R}$ and $f \in C^1(\mathbb{R})$. We denote the scalar product in $\mathbb{R}^n$ by $\langle.;.\rangle$. The following assertions are equivalent.
+    \begin{enumerate}
+        \item[(i)] the function $f$ is \emph{convex};
+        \item[(ii)] for every $x,y\in\mathbb{R}^n$, the following inequality holds
+        \[
+        f(x) \ge f(y) + \langle \nabla f(y);x-y\rangle;
+        \]
+        \item[(iii)] for every $x,y\in\mathbb{R}^n$, the following inequality is vails
+        \[
+        \langle \nabla f(x) - \nabla f(y);x-y\rangle \geq 0;
+        \]
+        \item[(iv)] If $f\in C^2(\mathbb{R}^n)$, then for every $x,v\in\mathbb{R}^n$,
+        \[
+            \langle \nabla^2 f(x)v,v\rangle \geq 0.
+        \]
+        This is equivalent to saying that the Hessian matrix $\nabla^2 f(x)$ is positive semidefinite.
+    \end{enumerate}
+\end{theorem}
+
+\section{The Direct Method}
+
+In this section, we develop the Direct Method of the Calculus of Variations. The Direct Method provides a framework for proving the existence of minimisers for a given functional and the conditions under which minimisers exist. We start by extending the model problem, (\ref{eq:Classical_P}), introduced at the beginning of the chapter, building on the theory of Sobolev spaces developed in Section \ref{sec:Sobolev_Spaces}. We then consider model problems to develop an intuition for the method. Following this, we introduce the main existence results and derive the Euler--Lagrange equation for the Direct Method in the setting of $\overline{u} \in W^{1,p}$. As with the previous sections, we will primarily follow Dacorogna \cite{dacorogna}, particularly Chapter 3, while also drawing on examples and notation from Rindler \cite{rindler}.
+
+
+For the Direct Method, we consider the problem
+\[
+\tag{P}
+\inf \left\{ I(u) = \int_\Omega f(x,u(x),\nabla u(x))\,dx
+: u\in u_0+W_0^{1,p}(\Omega) \right\}=m,
+\label{eq:Direct_P}
+\]
+where
+\begin{itemize}
+\item $\Omega\subset\mathbb{R}^n$ is a bounded open set;
+\item $f:\overline{\Omega}\times\mathbb{R}\times\mathbb{R}^n\rightarrow\mathbb{R}$, with $f=f(x,u,\xi)$;
+\item $u \in u_0\in W^{1,p}_0(\Omega)$ means that $u,u_0\in W_0^{1,p}(\Omega)$ and $u-u_0\in W_0^{1,p}(\Omega)$. (this corresponds to $u=u_0$ on $\partial\Omega$.)
+\end{itemize}
+We will show that, under suitable hypotheses, the problem, \ref{eq:Direct_P}, admits a solution $\overline{u}\in u_0+W_0^{1,p}(\Omega)$. In particular, we will require the following two main hypotheses:
+\begin{enumerate}
+\item \textit{Convexity:} for every $(x,u)\in\overline{\Omega}\times\mathbb{R}$, the function
+\(    \xi\mapsto f(x,u,\xi)
+   \)
+is convex.
+\item \textit{Coercivity:} there exist $p>q\geq1$ and constants $\alpha_1>0$, $\alpha_2,\alpha_3\in\mathbb{R}$ such that
+\[
+f(x,u,\xi)
+\geq
+\alpha_1|\xi|^p+\alpha_2|u|^q+\alpha_3,
+\]
+for all $(x,u,\xi)\in\overline{\Omega}\times\mathbb{R}\times\mathbb{R}^n$.
+\end{enumerate}
+
+
+The \textit{Dirichlet integral} which has integrand
+\[
+f(x,u,\xi) = \frac{1}{2}|\xi|^2
+\]
+satisfies both hypotheses.
+
+However the \textit{minimal surface} problem whose integrand is given by
+$$
+f(x,u, \xi) = \sqrt{1+|\xi|^2}
+$$
+satisfies Convexity but verifies Coercivity only with $p =1$
+
+\subsection{The Model Case}
+
+We consider the Dirichlet integral, 
+\begin{equation}
+\label{The Dirichlet Integral}
+\frac{1}{2} \int_\Omega  |\nabla u(x)|^2 \, dx.
+\end{equation}
+
+\begin{theorem}
+\label{thm:Direclet integral Therom}
+Let $\Omega \subset \mathbb{R}^n$ be bouned open set with Lipschitz boundary and $u_0 \in W^{1,2}(\Omega)$. The problem
+\begin{equation}
+\label{eq:Dirichlet Problem}
+\tag{D}
+    \inf \left\{ I(u) = \frac{1}{2} \int_\Omega  |\nabla u(x)|^2 \, dx : u \in u_0+W_0^{1,2}(\Omega)\right\} = m
+\end{equation}
+has one and only one solution $\overline{u} \in u_0 + W_0^{1,2}(\Omega)$.
+
+Furthermore $\overline{u}$ satisfies the weak from of the Laplace equation, namely
+\begin{equation}
+\label{eq:Dirichlet Lapalce}
+    \int_\Omega \langle \nabla\overline{u}(x); \nabla \varphi(x) \rangle \, dx = 0, \forall \varphi \in W_0^{1,2}(\Omega)
+\end{equation}
+
+where $\langle .;. \rangle$ denotes the scalar product in $\mathbb{R}^n$. Conversely, if $\overline{u} \in u_0 +W_0^{1,2}(\Omega)$ satisfies \eqref{eq:Dirichlet Lapalce} then it is a minimiser of \eqref{eq:Dirichlet Problem}
+\end{theorem}
+
+\begin{remark}
+An interesting historical connection to Section \ref{sec:backgound} is that the existence theorem stated above, Theorem~\ref{thm:Direclet integral Therom}, was proved before the development of Sobolev spaces. Hilbert, Lebesgue, and Tonelli established existence results for variational problems using the mathematical framework available at the time, with the modern Sobolev-space formulation developing later. See \cite{dacorogna}.
+\end{remark}
+
+\begin{proof}
+    \textbf{Part 1 (Existence).}
+    We divide the proof into three steps.
+    
+    \begin{enumerate}
+        \item[(i)] \textit{Compactness}
+        
+        Since $u_0 \in u_0 + W_0^{1,2}(\Omega)$ we have
+        $$
+        	0 \le m \le I(u_0) \le \infty.
+        $$
+        Let $u_\nu \in u_0 + W_0^{1,2}(\Omega)$ be a minimising sequence of \eqref{eq:Dirichlet Problem}, this means that
+        $$
+        I(u_\nu) \rightarrow \inf\{I(u)\} = m, \text{ as } \nu\rightarrow \infty.
+        $$
+        Observe that by the Poincar\'e inequality, Theorem \ref{thm:Poincare Inequality}, we can find constants $\gamma_1,\gamma_2>0$ so that,
+        $$
+        \sqrt{2I(u_\nu)} = \|\nabla u_\nu\|_{L^2} \ge \gamma_1\|u_\nu\|
+        _{W^{1,2}} - \gamma_2\|u_0\|_{W^{1,2}}.
+        $$
+        Since $u_\nu$ is a minimising sequence and $m<\infty$ we deduced there exists $\gamma_3 > 0$ so that
+        $$
+        \|u_\nu\| \le \gamma_3.
+        $$
+        It follows from Exercise 1.4.5 in Dacorogna~\cite[p.~47]{dacorogna} that there exists, $\overline{u} \in u_0 + W_0^{1,2}(\Omega)$ and a subsequence $u_\nu$ so that
+        $$
+        u_\nu \rightharpoonup \overline{u} \text{ in } W^{1,2}, \text{ as }v 
+        \rightarrow \infty.
+        $$
+        
+        \item[(ii)] \textit{Lower Semicontinuity}
+        
+        We will show that $I$ is sequentially weakly lower semicontinuous; meaning, 
+        $$
+        u_\nu \rightharpoonup \overline{u} \text{ in } W^{1,2} \implies \lim_{\nu\rightarrow\infty} \inf I(u_\nu) \ge I(\overline{u}).
+        $$
+        By expanding the gradient square, we get
+        $$
+        \begin{aligned}
+        |\nabla u_\nu|^2 &= |\nabla \overline{u}|^2 + 2 \langle \nabla \overline{u}; \nabla u_\nu -  \nabla \overline{u}\rangle + |\nabla u_\nu -  \nabla \overline{u}|^2,\\
+        &\ge |\nabla \overline{u}|^2 + 2 \langle \nabla \overline{u}; \nabla u_\nu -  \nabla \overline{u}\rangle.
+        \end{aligned}
+        $$
+        Integrating this, we have
+        $$
+        I(u_\nu) \ge I(\overline{u}) + \int_\Omega \langle \nabla \overline{u}; \nabla u_\nu -  \nabla \overline{u} \rangle \, dx.
+        $$
+        We need the second term to tend to $0$. Since $\nabla \overline{u} \in L^2$ and $\nabla u_\nu -  \nabla \overline{u} \rightharpoonup 0$ in $L^2$ by definition of weak convergence in $L^2$, that
+        $$
+        \lim_{\nu\rightarrow\infty} \int_\Omega \langle \nabla \overline{u}; \nabla u_\nu -  \nabla \overline{u} \rangle \, dx = 0.
+        $$
+        Therefore,
+        \[
+        \lim_{\nu\rightarrow\infty} \inf I(u_\nu) \ge I(\overline{u}).
+        \]
+        \item[(iii)] \textit{Combine}
+
+        Since $\{u_\nu\}$ was a minimising sequence (i.e. $I(u_\nu) \rightarrow \inf\{I(u)\} =m$) and for such a sequence we have lower semicontinuity (i.e. $\lim \inf I(u_\nu) \ge I(\overline{u})$) we can deduce that $I(\overline{u}) =m$
+    \end{enumerate}
+
+    \noindent\textbf{Part 2 (Uniqueness).}
+    
+    Assume that there exist $\overline{u},\overline{v}\in u_0+W_0^{1,2}(\Omega)$ such that
+    $$
+        I(\overline{u})=I(\overline{v})=m.
+    $$ 
+    Since the function $\xi\mapsto|\xi|^2$ is strictly convex, the functional $I$ is strictly convex. Therefore,
+    $$
+        I\left(\frac{\overline{u}+\overline{v}}{2}\right)
+        <
+        \frac{1}{2}I(\overline{u})+\frac{1}{2}I(\overline{v})
+        =m,
+    $$
+    unless $\overline{u}=\overline{v}$. This contradicts the definition of $m$ as the minimum of $I$. Hence,
+    $$
+        \overline{u}=\overline{v}.
+    $$
+    Therefore, the minimiser is unique.
+
+    \noindent \textbf{Part 3 (Euler--Lagrange equation).}
+    
+We want to establish \eqref{eq:Dirichlet Lapalce}. Let $\epsilon\in\mathbb{R}$ and $\varphi\in W_0^{1,2}(\Omega)$ be arbitrary. Since $\overline{u}\in u_0+W_0^{1,2}(\Omega)$ and $\varphi\in W_0^{1,2}(\Omega)$, we have
+$$
+    \overline{u}+\epsilon\varphi
+    \in u_0+W_0^{1,2}(\Omega).
+$$ 
+Combined with $\overline{u}$ is minimiser of (D) leads to
+    $$
+    \begin{aligned}
+    I(\overline{u}) &\le I(\overline{u} +\epsilon\varphi),\\
+    &= \int_{\Omega} \frac{1}{2}|\nabla\overline{u} +\epsilon\nabla\varphi|^2 \, dx,\\
+    &= I(\overline{u}) + \epsilon \int_{\Omega} \langle \nabla\overline{u};\nabla\varphi \rangle \, dx + \epsilon^2I(\varphi).
+    \end{aligned}
+    $$
+    As $\epsilon$ is arbitrary this leads to \eqref{eq:Dirichlet Lapalce} which expresses, 
+    $$
+    \left.\frac{d}{d\epsilon}I(\overline{u}+\epsilon\varphi)\right|_{\epsilon = 0} =0.
+    $$
+\end{proof}
+
+\subsection{A General Existence Theorem}
+
+In this section we state the direct methods theorem for $f \in C^0(\overline{\Omega} \times \mathbb{R} \times \mathbb{R}^n)$ and examples.
+
+\begin{theorem}
+    \label{thm:General_existence_theorem}
+    Let $\Omega \subset \mathbb{R}^n$ be a bounded open set with Lipschitz boundary. Let $f \in C^0(\overline{\Omega} \times \mathbb{R} \times \mathbb{R}^n)$, $f = f(x,u,\xi)$ satisfy,
+    $$
+    \begin{aligned}
+    (H1)\quad &\xi \mapsto f(x,u,\xi)
+    \text{ is convex for every }
+    (x,u)\in\overline{\Omega}\times\mathbb{R},\\[0.5em]
+    (H2)\quad &\text{There exist }
+    p>q\ge1,\;
+    \alpha_1>0,\;
+    \alpha_2,\alpha_3\in\mathbb{R}
+    \text{ such that}\\
+    &f(x,u,\xi)
+    \ge
+    \alpha_1|\xi|^p
+    +\alpha_2|u|^q
+    +\alpha_3,
+    \qquad
+    \forall (x,u,\xi)\in
+    \overline{\Omega}\times\mathbb{R}\times\mathbb{R}^n.
+    \end{aligned}
+    $$
+    Let
+    $$
+    (P) \quad \inf \left\{ I(u) = \int_\Omega f(x,u(x), \nabla u(x)) \, dx : u \in u_0 + W_0^{1,p}(\Omega) \right\} = m.
+    $$
+    where $u_0\in W^{1,p}(\Omega)$ with $I(u_0) < \infty$. Then there exists $\overline{u} \in u_0 + W^{1,p}_0(\Omega)$ a minimiser of $(P)$.
+    Furthermore if $(u,\xi) \rightarrow f(x,u,\xi)$ is strictly convex for every $x \in \overline{\Omega}$, then the minimiser is unique.
+\end{theorem}
+
+For a proof, see Dacorogna~\cite[p.~107]{dacorogna}.
+
+\begin{example}
+    The Dirichlet integral satisfies all the hypotheses with $p =2$. The generalisation of the Dirichlet integral is, where $g$ is continuous and non negative and $p>1$
+$$
+f(x,u,\xi) = \frac{1}{p}|\xi|^p +g(x,u).
+$$
+\end{example}
+
+\begin{example}
+    The minimal surface problem has an integrand given by
+$$
+f(x,u,\xi) = f(\xi) = \sqrt{1+|\xi|^2}
+$$
+satisfies all but $(H2)$, this is only verified at $p=1$. But this creates the Sobolev space $W^{1,1}$ which is not reflexive.
+\end{example}
+
+\begin{example}
+    The weakening of $(H2)$ leads to the following counterexample. 
+
+Let $n=1$, 
+\[
+f(x,u,\xi) =f(u,\xi) =\sqrt{u^2+\xi^2},
+\] 
+over $(0,1)$ with boundary $u(0) =0, u(1) =1$. with $u\in W^{1,1}(0,1)$.
+
+First, show that $m=1$ we start by observing that $m\ge 1$, 
+$$
+I(u) \ge \int^1_0 |u'(x)|\, dx \ge \int^1_0 u'(x)\, dx = u(1) -u(0) =1.
+$$
+
+To establish that $m=1$ we construct a minimising sequence $u_\nu$. 
+
+$$
+u_\nu(x)=
+\begin{cases}
+0, & \text{if } x \in \left[0,1-\frac{1}{\nu}\right],\\[0.5em]
+1+\nu(x-1), & \text{if } x \in \left[1-\frac{1}{\nu},1\right].
+\end{cases}
+$$
+
+Therefore $m =1$ since
+$$
+1 \le I(u_\nu) = \int^1_{1-\frac{1}{\nu}} \sqrt{(1+\nu(x-1))^2 +\nu^2} \, dx \le \frac{1}{\nu}\sqrt{1+\nu^2} \rightarrow 1, \text{ as }\nu \rightarrow \infty
+$$
+
+Assume for the sake of contradiction there exists $\overline{u}$ a minimiser of $(P)$. We have
+$$
+1 = I(\overline{u}) = \int^1_0 \sqrt{\overline{u}^2 + \overline{u}'^2} \, dx \ge \int^1_0 \overline{u}\, dx = \overline{u}(1) - \overline{u}(0) =1 
+$$
+this implies that $\overline{u} =0$ in $(0,1)$. $\overline{u} \equiv 0$ is incompatible with boundary conditions. Thus $(P)$ has no solution.
+\end{example}
+
+\subsection{Euler--Lagrange Equations}
+
+We now extend the Euler--Lagrange Theorem~\ref{thm:Euler-Lagrange} in the setting of the Direct Method, motivated by the general existence theorem, Theorem~\ref{thm:General_existence_theorem}. We then extend the result to minimisers in the setting of $\overline{u} \in W^{1,p}(\Omega)$.
+
+\begin{theorem}
+\label{thm:Direct_E_L}
+    Let $\Omega \in \mathbb{R}^n$ be a bounded open set with Lipschitz boundary. Let $p\ge1$ and $f\in C^1(\overline{\Omega} \times \mathbb{R} \times \mathbb{R}^n)$, $f =(x,u,\xi)$, satisfy
+$$
+(H3) \quad \text{There exists } b \ge 0 \text{ so that for every }(x,u,\xi) \in \overline{\Omega} \times \mathbb{R} \times \mathbb{R}^n
+$$
+$$
+|f_u(x,u,\xi)|, |f_\xi(x,u,\xi)| \le \beta(1+|u|^{p-1}+|\xi|^{p-1})
+$$
+where $f_\xi = (f_{\xi_i},\dots,f_{\xi_n})$, $f_{\xi_i} = \partial f / \partial \xi_i$ and $f_u = \partial f / \partial u$.
+\\
+Let $\overline{u} \in u_0 + W_0^{1,p}(\Omega)$ be a minimiser of
+$$
+(P) \quad \inf \left\{ I(u) = \int_\Omega f(x,u(x), \nabla u(x)) \, dx : u \in u_0 + W_0^{1,p} \right\} = m
+$$
+where $u_0 \in W^{1,p}(\Omega)$, the $\overline{u}$ satisfies the weak form of the Euler-Lagrange equation
+$$
+(E_w) \quad \int_\Omega [f_u(x,\overline{u},\nabla\overline{u})\varphi + \langle f_\xi(x,\overline{u},\nabla\overline{u});\nabla\varphi\rangle] \, dx = 0, \quad \forall \varphi \in W_0^{1,p}(\Omega).
+$$
+Moreover, if $f\in C^2(\overline{\Omega} \times \mathbb{R} \times \mathbb{R}^n)$ and $\overline{u} \in C^2$ then $\overline{u}$ satisfies the standard Euler-Lagrange equation
+$$
+(E) \quad \sum_{i =1}^n \frac{\partial}{\partial x_i} [f_{\xi_i}(x,\overline{u},\nabla\overline{u})] = f_u(x,\overline{u},\nabla\overline{u}), \quad \forall x \in \overline{\Omega}.
+$$
+\\
+Conversely, if $(u,\xi) \rightarrow f(x,u,\xi)$ is convex for every $x \in \overline{\Omega}$ and if $\overline{u}$ is a solution of either $(E_w)$ or $(E)$  then it is a minimiser of $(P)$
+\end{theorem}
+
+We now have all the tools we need to use the direct method for the model terrain problem. {\color{red} cite this after introis written}
