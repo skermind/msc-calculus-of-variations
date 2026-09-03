@@ -628,7 +628,7 @@ The resulting path therefore showed only a relatively small improvement
 from the initial configuration, with no substantial change in the
 overall geometry of the path.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     
     \begin{minipage}{0.48\textwidth}
@@ -659,7 +659,7 @@ regions of the solution space. An animation of this optimisation
 process is available in the accompanying GitHub repository
 \cite{skerman2026calculus}.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     
     \begin{minipage}{0.48\textwidth}
@@ -678,9 +678,11 @@ process is available in the accompanying GitHub repository
     
 \end{figure}
 
-\subsection{Add Curvature to Model}
+\subsection{Adding Curvature to the Model}
+\label{subsec:adding_curvature} 
 
-Following the experiments and then decisions around using the weighted segmented shift move I slowly built up to our objective function \eqref{eq:ModelProblem}. First we added curveture penalties into the model to give an objextive function of,
+Following the experiments with the neighbourhood moves, the objective functional was progressively extended towards the full model problem \eqref{eq:ModelProblem}. The first additional term considered was the curvature penalty, giving
+
 \[
 J(\gamma)
 =
@@ -691,7 +693,8 @@ w_c c(x,y)
 \lambda\kappa^2
 \right]\,ds.
 \]
-I would experiment with the weights to try and find a result that looks approximately what i would expect blow you will see the rsults of three experiments testing for $\lambda = \{1,5,20\}$. In the table we compare the costs of the inttial stright line to the final results with differing values for $\lambda$. Initally the curveture cost is so low at $1.56 \times 10^{-26}$ almost zero. We'd expect this from a stright line. In this case the weights that gave an result that looks like we'd expect were $(w_c,\lambda) = (1,5)$. This was encouge the model to find a smoother path. 
+
+The purpose of introducing this term was to investigate how penalising curvature affects the resulting path. In particular, the weighting parameter $\lambda$ controls the relative importance of path smoothness compared with the terrain cost. Three values weren considered, $\lambda\in\{1,5,20\}$, while keeping the other parameters fixed. The resulting costs are shown in Table~\ref{tab:lambda_results}.
 
 \begin{table}[H]
     \centering
@@ -714,48 +717,263 @@ I would experiment with the weights to try and find a result that looks approxim
     \end{tabular}
 \end{table}
 
-\subsection{Effect of Model Parameters}
+For the initial straight-line path, the curvature cost is $1.56\times10^{-26}$, which is effectively zero as expected for a straight path. For $\lambda=1$ and $\lambda=5$, the total costs are  similar, with values of $144.165$ and $147.352$, respectively. In both cases, the reduction in terrain cost is sufficiently large that the curvature contribution remains relatively small. For $\lambda=20$, the curvature cost is reduced to approximately $0.0191$, compared with $0.278$ and $0.271$ for $\lambda=1$ and $\lambda=5$, respectively. This corresponds to a reduction of over an order of magnitude in the curvature contribution. At the same time, the terrain cost increases to $155.249$, indicating that the larger value of $\lambda$ causes the optimisation to prioritise smoothness over avoiding the high-cost region.
 
-% Analyse the effect of changing the terrain, curvature and length
-% weights.
-%
-% Discuss the trade-offs observed between the different components of
-% the objective function.
+The effect of this change can also be seen in the resulting paths in Figures~\ref{fig:lambda=1Results}, \ref{fig:lambda=5Results}, and \ref{fig:lambda=20Results}. For $\lambda=1$ and $\lambda=5$, the resulting paths pass through the higher-cost region while maintaining a relatively smooth trajectory. In contrast, $\lambda=20$ places a much stronger penalty on curvature and produces a path which remains close to the initial straight-line configuration. This demonstrates that the curvature weighting is influencing the optimisation as intended, while also illustrating the trade-off between terrain cost and path smoothness.
 
 
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=1Analysis.png}
+        \caption{$\lambda = 1$}
+        \label{fig:lambda=1Analysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=5Analysis.png}
+        \caption{$\lambda = 5$}
+        \label{fig:lambda=5Analysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=20Analysis.png}
+        \caption{$\lambda = 20$}
+        \label{fig:lambda=20Analysis}
+    \end{minipage}
+    
+\end{figure}
 
+\begin{figure}[htbp]
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=1Results.png}
+        \caption{$\lambda = 1$}
+        \label{fig:lambda=1Results}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=5Results.png}
+        \caption{$\lambda = 5$}
+        \label{fig:lambda=5Results}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/CurvetureLambda=20Results.png}
+        \caption{$\lambda = 20$}
+        \label{fig:lambda=20Results}
+    \end{minipage}
+    
+\end{figure}
 
+\subsection{Adding Length to the Model}
+\label{subsec:adding_length}
 
-\subsection{Variability Between Runs}
+We now introduce the final term of the model, giving the complete objective functional considered in this chapter:
 
-% Discuss the stochastic nature of simulated annealing.
-%
-% If experiments were repeated, compare the variation in the resulting
-% paths and objective values.
-%
-% Discuss the implications for interpreting the numerical results.
+\[
+J(\gamma)
+=
+\int_\gamma
+\left[
+w_c c(x,y)
++
+\lambda\kappa^2
++
+\mu
+\right]\,ds.
+\]
 
+The three weighting parameters $(w_c,\lambda,\mu)$ determine the relative importance of terrain cost, curvature and path length, respectively. Increasing $w_c$ encourages the path to avoid high-cost terrain, while increasing $\lambda$ favours smoother paths and increasing $\mu$ penalises longer routes. The choice of these parameters therefore determines the balance between the three competing objectives.
+
+Through experimentation, a weighting of
+ \[
+(w_c,\lambda,\mu)=(2,20,1)
+\] 
+was found to produce a satisfactory balance for the terrain considered in this study. The resulting optimisation is shown in Figure~\ref{fig:FullAanalysis}, while the final path is shown in Figure~\ref{fig:FullResults}.
+
+The resulting path demonstrates the trade-off between the three terms in the objective functional. Rather than completely avoiding the high-cost region, the path passes around the hill while maintaining a relatively smooth trajectory. The curvature penalty prevents the sharp changes in direction observed when only the terrain cost was considered, while the length penalty discourages the path from making an unnecessarily large detour. 
+
+Compared with the initial straight-line path, the final solution therefore represents a compromise between the competing objectives. The terrain cost is reduced by allowing the path to deviate from the straight line, while the curvature and length terms limit the extent of this deviation.
+
+The weighting parameters used here are problem-dependent and were selected experimentally for the numerical example considered. They should therefore be interpreted as relative weighting parameters rather than universal physical constants. A more systematic investigation of the parameter space could be used to determine how the resulting path changes as each component of the objective functional is prioritised.
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/FullAnalysis.png}
+        \caption{Evolution of the path cost.}
+        \label{fig:FullAanalysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/FullResults.png}
+        \caption{Final path obtained using simulated annealing.}
+        \label{fig:FullResults}
+    \end{minipage}
+    
+\end{figure}
+
+\subsection{Normalised Weights}
+\label{subsec:normalweigts}
+
+The weighting parameters used in the previous experiments were selected
+experimentally and therefore introduced a degree of arbitrariness into
+the model. To investigate whether this could be reduced, the objective
+functional was reformulated by normalising each cost component with
+respect to its value for the initial path. The resulting functional was
+taken to be
+\[
+J(\gamma)
+=
+\frac{w_c}{C_0}C(\gamma)
++
+\frac{\lambda}{K_0}K(\gamma)
++
+\frac{\mu}{L_0}L(\gamma),
+\]
+where $C(\gamma)$, $K(\gamma)$ and $L(\gamma)$ denote the terrain,
+curvature and length costs, respectively, and $C_0$, $K_0$ and $L_0$
+are their corresponding values for the initial path. The weighting
+parameters are constrained such that
+\[
+w_c+\lambda+\mu=1.
+\]
+
+The motivation for this formulation is to place the three cost
+components on a more comparable scale before applying their respective
+weights. However, the initial straight-line path has an almost zero
+curvature cost. Consequently, the value of $K_0$ is extremely small,
+causing the normalised curvature term
+\[
+\frac{\lambda}{K_0}K(\gamma)
+\]
+to become disproportionately large and preventing a meaningful
+balance between the three terms.
+
+To address this, the initial path was first subjected to $50$ random
+segmented shift moves. This produced a reference path with a larger
+curvature cost, allowing the three components to be normalised without
+the curvature term dominating the objective.
+
+For the example considered, the resulting weights were
+\[
+(w_c,\lambda,\mu)
+=
+(0.8348,\;6.88\times10^{-29},\;0.0987),
+\]
+with initial reference costs
+\[
+C_0=1194.0065,\qquad
+K_0=0.2609,\qquad
+L_0=92.2243.
+\]
+
+The resulting optimisation is shown in
+Figure~\ref{fig:NormalisedAanalysis}, with the final path shown in
+Figure~\ref{fig:NormalisedResults}. The path provides a reasonable
+solution, although some irregular behaviour can be observed near the
+end point. One possible explanation is the interaction between the
+normalised cost weights and the cost-weighted selection of the
+segmented shift move, which influences where changes to the path are
+most likely to occur.
+
+The normalisation therefore reduces some of the dependence on the
+absolute magnitude of the individual cost components, but it does not
+remove the need to select appropriate relative weights. In this
+example, the resulting path is less satisfactory than some of the
+solutions obtained using manually selected weights. Further
+investigation of the weighting scheme and its interaction with the
+neighbourhood construction would therefore be required.
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/NormalisedAnalysis.png}
+        \caption{Evolution of the path cost using the segmented shift move.}
+        \label{fig:NormalisedAanalysis}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/NormalisedResults.png}
+        \caption{Final path obtained using simulated annealing with the segmented shift move.}
+        \label{fig:NormalisedResults}
+    \end{minipage}
+    
+\end{figure}
 
 \section{Limitations and Further Work}
+\label{sec:limitations}
 
-% Discuss the limitations of the numerical approach.
-%
-% Possible limitations include:
-% - The discretisation provides only an approximation to a continuous path.
-% - Simulated annealing does not guarantee the global minimum.
-% - Results may depend on the choice of algorithm parameters.
-% - Curvature approximations depend on the path discretisation.
-% - The computational cost may increase for more complicated terrain.
-%
-% Discuss possible improvements and directions for future work.
+The numerical experiments presented in this chapter provide a
+controlled environment for investigating the proposed cost functional
+and optimisation method. The terrain model is intentionally simplified
+and should therefore be viewed as a numerical sandbox rather than a
+realistic railway or road planning model.
 
+\subsection{Limitations}
 
-\section{Chapter Summary}
+The discretisation provides only an approximation to the continuous
+problem, with the curvature term in particular represented using a
+finite-difference substitute. Simulated annealing also provides no
+guarantee of finding a global minimiser, and the results may depend on
+the initial path, random choices and algorithm parameters.
 
-% Briefly summarise the numerical methods and main findings of the chapter.
-%
-% Highlight how the continuous variational problem was transformed into
-% a discrete optimisation problem and investigated using simulated
-% annealing.
-%
-% Provide a transition to the next chapter, if appropriate.
+The weighting parameters $(w_c,\lambda,\mu)$ and the annealing
+parameters were selected largely through experimentation. The
+cost-weighted segmented shift move also contains heuristic choices,
+meaning that different parameter values or neighbourhood constructions
+may produce different results. A more systematic investigation would
+therefore be required to establish the robustness of the numerical
+results.
+
+Finally, the terrain considered is relatively simple. More complicated
+terrain, obstacles and higher spatial resolutions would increase the
+computational cost and provide a more demanding test of the method.
+
+\subsection{Further Work}
+
+A natural extension would be a systematic investigation of the
+parameter space to better understand the trade-off between terrain
+cost, curvature and path length. The numerical implementation could
+also be refactored using the lessons learned during its development,
+reducing the reliance on problem-specific heuristics.
+
+The terrain model could be extended to include multiple terrain
+features and impassable regions, where the corresponding areas are
+removed from the admissible domain $\Omega$. Introducing elevation
+would further extend the problem to three dimensions,
+\[
+\gamma : [0,1] \rightarrow \mathbb{R}^3,
+\]
+allowing gradients, ramps and tunnelling to be considered.
+
+A further long-term objective would be to apply the method to
+real-world geographical data. Mapping and terrain data could be
+converted into a discretised cost field, allowing the optimisation
+method to be tested on realistic route-planning problems.
+
+\subsection{Concluding Remarks}
+
+Despite these limitations, the numerical experiments demonstrate that
+including terrain, curvature and length costs can produce non-trivial
+paths for which the straight-line route is not necessarily optimal.
+The experiments therefore provide numerical evidence supporting the
+motivation for the model developed in this dissertation. They also
+illustrate the complementary roles of the direct method, which
+provides a theoretical framework for the existence of minimisers, and
+numerical optimisation, which allows their approximate form to be
+investigated computationally.
+
