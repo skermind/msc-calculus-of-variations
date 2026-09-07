@@ -8,6 +8,9 @@ In this dissertation, I explore applications of the Direct Method of the Calculu
 
 {\color{red} Introduction should be longer and more detailed. At its current stage it looks like an abstract of a paper. We should write it at the end, after everything finishes so that we can tell in details what we have done. Don't worry about it now, leave it for the moment.}
 
+
+
+
 \section{Background}
 \label{sec:backgound}
 
@@ -23,3 +26,14 @@ Following the development of the Classical Method, what is now known as the Dire
 
 This brings us to the present day, where the field of the Calculus of Variations is both broad and active. Mathematicians continue to develop the theory and apply it to an increasingly diverse range of problems, leaving their mark on the subject across areas of both pure and applied mathematics.
 
+\section{Problem Choice}
+
+It was initially hard for me to come to a decision regarding which problem to work on. The Calculus of Variations as a mathematical discipline has applications in a vast number of fields. After reading about Dido's problem and having a first discussion with my supervisor about possible problems, I was particularly attracted to path-planning problems.
+
+At the start of my dissertation, I had begun reading about applications of optimisation and variational methods in economics and finance, including the work of Kamien and Schwartz \cite{kamien1981dynamic} and Malliavin and Thalmaier \cite{malliavin2006stochastic}. This reading made clear that I lacked some of the analytical foundations required to pursue these problems rigorously. In particular, I understood the importance of developing a stronger functional-analytis foundations underlying the Direct Method of the Calculus of Variations. Following discussions with my supervisor, it was therefore decided that the dissertation would focus on developing these foundations, using Dacorogna's \textit{Introduction to the Calculus of Variations} \cite{dacorogna} as a key reference.
+
+We considered a modified version of Dido's problem in which the objective is no longer to maximise area with a length constraint, but to determine an efficient path through a spatially varying cost field. The model includes penalties for  both the length and curvature of the path. This formulation was motivated in part by a video from Wendover Productions \cite{wendover2026} discussing the possible routes for the California High-Speed Rail project. The selection of a high-speed rail route must consider the different costs for each path, while also keeping journey length short and the geometric restrictions of high-speed rail.
+
+The spatially varying cost field represents the differing costs of construction across a region, the length term penalises unnecessarily long routes, and the curvature term accounts for the geometric requirements of the railway. Although the motivating application is railway planning, the same mathematics could be applied to other large-scale infrastructure problems, such as motorway or pipeline route planning.
+
+This problem was ultimately chosen because it provides both a meaningful application and a natural setting in which to investigate the Direct Method. The precise mathematical formulation and assumptions underlying the model are developed in Chapter \ref{chp: Mathematical Analysis}, where we consider the associated second-order nonlinear problem \eqref{eq:ModelPrblem_s}.

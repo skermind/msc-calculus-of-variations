@@ -1,0 +1,60 @@
+The numerical experiments presented in this chapter provide a
+controlled environment for investigating the proposed cost functional
+and optimisation method. The terrain model is intentionally simplified
+and should therefore be viewed as a numerical sandbox rather than a
+realistic railway or road planning model.
+
+\section{Limitations}
+
+The discretisation provides only an approximation to the continuous
+problem, with the curvature term in particular represented using a
+finite-difference substitute. Simulated annealing also provides no
+guarantee of finding a global minimiser, and the results may depend on
+the initial path, random choices and algorithm parameters.
+
+The weighting parameters $(w_c,\lambda,\mu)$ and the annealing
+parameters were selected largely through experimentation. The
+cost-weighted segmented shift move also contains heuristic choices,
+meaning that different parameter values or neighbourhood constructions
+may produce different results. A more systematic investigation would
+therefore be required to establish the robustness of the numerical
+results.
+
+Finally, the terrain considered is relatively simple. More complicated
+terrain, obstacles and higher spatial resolutions would increase the
+computational cost and provide a more demanding test of the method.
+
+\section{Further Work}
+
+A natural extension would be a systematic investigation of the
+parameter space to better understand the trade-off between terrain
+cost, curvature and path length. The numerical implementation could
+also be refactored using the lessons learned during its development,
+reducing the reliance on problem-specific heuristics.
+
+The terrain model could be extended to include multiple terrain
+features and impassable regions, where the corresponding areas are
+removed from the admissible domain $\Omega$. Introducing elevation
+would further extend the problem to three dimensions,
+\[
+\gamma : [0,1] \rightarrow \mathbb{R}^3,
+\]
+allowing gradients, ramps and tunnelling to be considered.
+
+A further long-term objective would be to apply the method to
+real-world geographical data. Mapping and terrain data could be
+converted into a discretised cost field, allowing the optimisation
+method to be tested on realistic route-planning problems.
+
+\section{Concluding Remarks}
+
+Despite these limitations, the numerical experiments demonstrate that
+including terrain, curvature and length costs can produce non-trivial
+paths for which the straight-line route is not necessarily optimal.
+The experiments therefore provide numerical evidence supporting the
+motivation for the model developed in this dissertation. They also
+illustrate the complementary roles of the direct method, which
+provides a theoretical framework for the existence of minimisers, and
+numerical optimisation, which allows their approximate form to be
+investigated computationally.
+
