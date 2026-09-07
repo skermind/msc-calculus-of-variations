@@ -1,271 +1,726 @@
-
-
-In this chapter, we introduce the problem we want to study in this dissertation as an application of calculus of variations, and derive the mathematical model for it. 
-
-
-\section{The problem}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+In this chapter, we introduce the problem studied in this dissertation as an application of the Calculus of Variations and derive the corresponding mathematical model. We then apply the Direct Method of the Calculus of Variations to establish the existence of a minimiser and derive the associated Euler--Lagrange equation. Throughout this chapter, the problem is formulated using the arc-length parameter $s$, leading to the variational problem
+\begin{equation}
+\label{eq:ModelPrblem_s}
+\tag{P}
+J[\gamma(s)]
+=
+\underset{\gamma \in \Omega}{\min} \int_{s_0}^{s_1}
+\left(
+c(\gamma(s))
++
+\lambda |\gamma''(s)|^2
++
+\mu
+\right) ds.
+\end{equation}
 
 \section{Mathematical modelling}
-\label{sec:model_problem}
+\label{sec:problem_formulation}
 
+We consider a path-planning problem in a two-dimensional domain
+representing a terrain. The objective is to determine a path between two
+boundary points while balancing three competing considerations: the
+cost associated with the terrain traversed, the cost from the length of the
+path, and the cost of a curvature penality along the path.
 
-Let $\Omega \subset \mathbb{R}^2$ denote the domain representing the
-terrain on the two-dimensional Euclidean space and let $a,b \in \Omega$ denote the prescribed start and end
-points, respectively. An admissible path is represented by a
-sufficiently smooth curve defined by
+Let $\Omega\subset\mathbb{R}^2$ denote the domain representing the
+terrain, and let $a,b\in\Omega$ denote the prescribed starting and
+ending points, respectively. An admissible path connecting these
+points is represented by a sufficiently smooth curve
 \[
-\gamma : [0,1] \rightarrow \mathbb{R}^2,
-\]
-and satisfying the boundary conditions given as
-\[
-\gamma(0)=a,
+\gamma:[s_0,s_1]\rightarrow\Omega,
 \qquad
-\gamma(1)=b.
+\gamma(s)=(x(s),y(s)),
 \]
-The collection of admissible curves satisfying these boundary
+satisfying the boundary conditions
+\[
+\gamma(s_0)=a,
+\qquad
+\gamma(s_1)=b.
+\]
+Here, $s$ denotes the arc-length parameter along the curve.
+
+The collection of admissible paths satisfying these boundary
 conditions, together with any additional constraints imposed by the
 terrain, is denoted by $\Gamma$.
 
-The terrain is described by a cost field
-\[
-c:\Omega\rightarrow\mathbb{R},
-\]
+The terrain is characterised by a cost field
+
+$$
+c:\Omega\rightarrow\mathbb{R}, \qquad \Omega \subset \mathbb{R}^2.
+$$
+
 where $c(x,y)$ represents the cost associated with traversing the
-terrain at the point $(x,y)$. In the simplest formulation, the cost of
-a path is given by
+terrain at the point $(x,y)$. Regions with larger values of $c(x,y)$
+are therefore more costly for the path to traverse. The cost incurred
+by a path due solely to the terrain is given by the line integral
 \begin{equation}
-J_{\mathrm{terrain}}(\gamma)
-=
-\int_\gamma c(x,y)\,ds.
+J_{\mathrm{terrain}}(\gamma) = 
+\int_\gamma c(x,y),ds.
 \label{eq:terrain_functional}
 \end{equation}
-This functional accounts for both the cost of the terrain encountered
-by the path and the distance travelled through each region.
 
-In order to incorporate additional considerations relevant to the
-path-planning problem, penalties for curvature and total path length
-are introduced. The resulting functional is written in the compact
-form
+While minimising this quantity favours paths through regions of low
+terrain cost, it does not by itself account for the cost induced by length or curvature
+of the path. A path could, for example, reduce its terrain
+cost by taking a substantially longer route. Similarly, a path with
+large changes in direction may be undesirable even if it has low
+terrain cost and relatively short length as this is not realisic for a railway. We incorporate
+additional penalties for path length and curvature.
+
+The resulting functional is defined by
 \begin{equation}
 \boxed{
-J(\gamma)
-=
+J(\gamma) = 
 \int_\gamma
 \left[
-w_c c(x,y)
+c(x,y)
 +
 \lambda\kappa^2
 +
 \mu
-\right]\,ds
+\right] ds,
 }
 \label{eq:ModelProblem}
 \end{equation}
-where $w_c$, $\lambda$, and $\mu$ are non-negative parameters controlling
-the relative contribution of the terrain cost, curvature, and length,
+where $\lambda$, and $\mu$ are non-negative parameters controlling
+the contribution of the terms of the integrand. These terms represent terrain cost, curvature, and length,
 respectively.
 
-The first term in the integrand,
-\[
-w_c c(x,y),
-\]
-represents the cost associated with traversing the terrain. The
-parameter $w_c$ allows the contribution of the terrain cost to be
-scaled relative to the additional penalties.
-
-The second term,
-\[
-\lambda\kappa^2,
-\]
-penalises curvature. In particular, the square of the curvature assigns
-increasingly greater cost to regions of the path with large curvature,
-thereby discouraging sharp changes in direction and favouring smoother
-paths.
-
-Finally, the constant term $\mu$ represents a penalty on the total
-length of the path. Since
-\[
-L(\gamma)=\int_\gamma 1\,ds,
-\]
-the contribution of this term to the functional is
-\[
-\mu\int_\gamma 1\,ds
-=
-\mu L(\gamma).
-\]
-Consequently, the functional in \eqref{eq:ModelProblem} can equivalently
-be written as
+The path-planning problem is consequently formulated as the
+minimisation problem
 \begin{equation}
-J(\gamma)
-=
-w_c\int_\gamma c(x,y)\,ds
-+
-\lambda\int_\gamma\kappa^2\,ds
-+
-\mu L(\gamma).
-\label{eq:expanded_model}
-\end{equation}
-
-The corresponding variational problem is therefore
-\begin{equation}
-\inf_{\gamma\in\Gamma} J(\gamma).
+\inf_{\gamma\in\Gamma}J(\gamma).
 \label{eq:extended_problem}
 \end{equation}
 
-The three terms in \eqref{eq:ModelProblem} introduce a trade-off between
-terrain cost, path smoothness, and path length. Increasing $w_c$
-favours paths which avoid regions of high terrain cost, while increasing
-$\lambda$ places greater emphasis on smoothness. Similarly, increasing
-$\mu$ makes longer paths increasingly expensive and therefore favours
-shorter routes. The numerical investigation that follows seeks to
-understand how these competing terms influence the resulting
-approximate minimisers.
+We now reformulate the integrand in \eqref{eq:ModelProblem} term by term to obtain the more convenient formulation given in \eqref{eq:ModelPrblem_s}.
 
-\subsection{Arc Length and Path Length}
-\label{subsec:arc_length}
 
-Let the curve $\gamma$ be parametrised by
-\[
-\gamma(t)=(x(t),y(t)),
-\qquad t\in[0,1].
-\]
-The length of the curve is given by
-\begin{equation}
-L(\gamma)
+\subsection{Terrain Cost Term}
+\label{subsec:Terrain_term}
+
+The first term in the integrand of \eqref{eq:ModelProblem} represents
+the cost associated with traversing the terrain. Let
+$$
+\gamma(s)=(x(s),y(s)),
+$$
+denote the path parametrised by arc length $s$. Since the cost field is
+defined by
+$$
+c:\Omega\rightarrow\mathbb{R},
+$$
+the cost at any point on the path is obtained by evaluating $c$ at the
+position of the curve. Thus,
+$$
+c(x,y)
+\quad\longrightarrow\quad
+c(x(s),y(s))
 =
-\int_0^1
-\|\gamma'(t)\|\,dt.
-\label{eq:path_length}
-\end{equation}
+c(\gamma(s)).
+$$
 
-More generally, the arc length measured from $\gamma(0)$ to
-$\gamma(t)$ is
-\begin{equation}
-s(t)
-=
-\int_0^t
-\|\gamma'(\tau)\|\,d\tau.
-\label{eq:arc_length}
-\end{equation}
+The key step here is the composition of the cost field
+with the path,
+$$
+c\circ\gamma:[s_0,s_1]\rightarrow\mathbb{R},
+\qquad
+(c\circ\gamma)(s)=c(\gamma(s)).
+$$
 
-Thus, an integral with respect to arc length can be expressed in terms
-of the parameter $t$ according to
-\begin{equation}
-\int_\gamma f(x,y)\,ds
-=
-\int_0^1
-f(\gamma(t))
-\|\gamma'(t)\|\,dt.
-\label{eq:line_integral}
-\end{equation}
+In other words, the terrain cost along the path is represented by the
+composition $c\circ\gamma$. This makes explicit why the cost field
+$c(x,y)$ becomes $c(\gamma(s))$ when the path is parametrised by $s$.
+rather than evaluating the cost at an arbitrary point in the domain,
+we evaluate it at the position of the curve as it traverses the
+terrain.
 
-In particular, the terrain component of the functional can be written
-as
-\begin{equation}
+Consequently, the terrain component of the functional becomes
+
+$$
 \int_\gamma c(x,y)\,ds
 =
-\int_0^1
-c(\gamma(t))
-\|\gamma'(t)\|\,dt.
-\end{equation}
+\int_{s_0}^{s_1}c(\gamma(s))\,ds.
+$$
 
-\subsection{Curvature Penalty}
+\subsection{Path Length Term}
+\label{subsec:length_penalty}
+
+The final term in the integrand of \eqref{eq:ModelProblem} represents a
+penalty on the total length of the path. For a curve
+
+$$
+\gamma:[s_0,s_1]\rightarrow\mathbb{R}^2,
+$$
+the length of the path is given by
+\begin{equation}
+L(\gamma)
+\int_{s_1}^{s_0}\gamma \, ds,
+\label{eq:path_length}
+\end{equation}
+where $s$ denotes the arc-length parameter.
+
+More generally, if the curve is initially parametrised by an arbitrary parameter  
+$t\in[t_0,t_1]$, its length is given by
+$$
+L(\gamma)
+=
+\int_{t_0}^{t_1}
+|\gamma'(t)|\,dt.
+$$
+Introducing the arc-length parameter
+$$
+s(t)
+=
+\int_{t_0}^{t}
+|\gamma'(\tau)|\,d\tau,
+$$
+allows the curve to be parametrised directly by the distance travelled
+along the path. Consequently,
+$$
+|\frac{d\gamma}{ds}|=1.
+$$
+
+Thus, for an arc-length parametrised curve, an change in $ds$
+corresponds directly to an change in the length of the path, giving
+$$
+L(\gamma)
+=
+\int_{s_0}^{s_1}1\,ds.
+$$
+The length penalty in the functional is therefore
+\begin{equation}
+J_{\mathrm{length}}(\gamma) =   \mu L(\gamma) =
+\mu\int_{s_0}^{s_1}1,ds.
+\label{eq:length_functional}
+\end{equation}
+Hence, the contribution of the length penalty to the integrand of
+\eqref{eq:ModelProblem} is simply
+$$
+\mu.
+$$
+The parameter $\mu\geq0$ controls the relative importance assigned to
+the total length of the path. Increasing $\mu$ therefore places a
+greater penalty on longer paths.
+
+
+\subsection{Curvature Cost Term}
 \label{subsec:curvature_penalty}
 
-The curvature of a curve measures the rate at which its direction
-changes with respect to arc length. When $\gamma$ is parametrised by
-arc length $s$, the tangent vector satisfies
-\[
-\left\|\frac{d\gamma}{ds}\right\|=1,
-\]
-and the curvature is given by
+The second term in the integrand of \eqref{eq:ModelProblem} penalises
+the curvature of the path. To express this term in terms of the
+derivatives of $\gamma$, we first consider a general parametrisation
+
+$$
+\gamma(t)=(x(t),y(t)),
+\qquad t\in[t_0,t_1].
+$$
+For a sufficiently smooth planar curve, the curvature is given by
 \begin{equation}
+\kappa(t) = 
+\frac{\left|\gamma'(t)\times\gamma''(t)\right|}
+{\left|\gamma'(t)\right|^3}.
+\label{eq:curvature_general}
+\end{equation}
+
+We now consider the arc-length parametrisation used in the formulation
+of the functional. As shown in the previous subsection, when $s$ is
+the arc-length parameter, the curve has unit speed, so that
+\begin{equation}
+\left|\gamma'(s)\right|=1.
+\label{eq:unit_speed}
+\end{equation}
+It can be shown that, $\gamma'(s)$ and $\gamma''(s)$ are orthogonal. Consequently,
+
+$$
+\left|\gamma'(s)\times\gamma''(s)\right|
+=
+\left|\gamma'(s)\right|
+\left|\gamma''(s)\right|
+=
+\left|\gamma''(s)\right|,
+$$
+where \eqref{eq:unit_speed} has been used. Substituting these results into \eqref{eq:curvature_general} gives
+$$
 \kappa(s)
 =
-\left\|
-\frac{d^2\gamma}{ds^2}
-\right\|.
+\frac{\left|\gamma''(s)\right|}
+{\left|\gamma'(s)\right|^3}
+=\frac{\left|\gamma''(s)\right|}
+{(1)^3} = 
+\left|\gamma''(s)\right|.
+$$
+Therefore,
+\begin{equation}
+\kappa(s)=\left|\gamma''(s)\right|.
 \label{eq:curvature_arclength}
 \end{equation}
-
 The curvature contribution to the functional is consequently
 \begin{equation}
-J_{\mathrm{curvature}}(\gamma)
-=
-\int_\gamma \kappa^2\,ds.
+J_{\mathrm{curvature}}(\gamma)=
+\lambda\int_\gamma\kappa^2 ds.
 \label{eq:curvature_functional}
 \end{equation}
+Using \eqref{eq:curvature_arclength}, this becomes
+$$
+J_{\mathrm{curvature}}(\gamma)
+=
+\lambda
+\int_{s_0}^{s_1}
+\left|\gamma''(s)\right|^2 ds.
+$$
+Hence, the curvature contribution to the integrand of
+\eqref{eq:ModelProblem} can be written as
 
-The use of $\kappa^2$ ensures that curvature is penalised independently
-of its direction, while placing a greater penalty on regions where the
-path bends sharply. This provides a mechanism for controlling the
-smoothness of the resulting path.
+$$
+\lambda\kappa^2
+=
+\lambda\left|\gamma''(s)\right|^2.
+$$
+The use of $\kappa^2$ penalizes curvature independently of its
+direction, while assigning a greater cost to regions where the path
+bends more sharply. The parameter $\lambda\geq0$ therefore controls the
+relative importance of path smoothness within the functional.
 
-The formulation in \eqref{eq:ModelProblem} therefore provides a
-mathematical representation of the competing requirements of the
-path-planning problem. In the following sections, this continuous
-variational problem is discretised and implemented computationally,
-allowing approximate minimisers to be obtained using simulated
-annealing.
+\section{Euler--Lagrange Equations - Classical Approach}
 
-\section{Euler-Lagrange Equations}
-
-{\color{red} This is just to dot down some maths before discussiuoins are proper write up}
-
-First investigate the problem in terms of $s$ instead of $x,y$ we can rewrite the \eqref{eq:ModelProblem} as 
+As established in the previous section, the proposed path-planning problem can be expressed in terms of the arc-length parameter $s$. Recalling \eqref{eq:ModelPrblem_s}, the functional is given by
 \begin{equation}
-    \label{eq:ModelPrblem_s}
-    J[\gamma] = \int_{s_0}^{s_1} c(\gamma(s)) + \lambda|\gamma''(s)|^2 + \mu \, ds.
+J[\gamma]
+=
+\int_{s_0}^{s_1}
+\left(
+c(\gamma(s))
++
+\lambda |\gamma''(s)|^2
++
+\mu
+\right) ds.
 \end{equation}
 
-Using the Second order Euler Ladgrange Equation {\color{red} referance this}
-\[
-\frac{\partial F}{\partial\gamma} - \frac{d}{ds}\left[\frac{\partial F}{\partial\gamma'}\right] + \frac{d^2}{d^2s}\left[\frac{\partial F}{\partial\gamma''}\right] = 0
-\]
-
-we are left with 
+The corresponding Euler--Lagrange equation provides a necessary condition for a sufficiently smooth minimiser of the functional. For a second-order functional of the form
+$$
+J[\gamma]
+=
+\int_{s_0}^{s_1}
+F(\gamma,\gamma',\gamma'')\,ds,
+$$
+the second-order Euler--Lagrange equation is given by
 \begin{equation}
-    \label{eq:ModelProblem_EL_Solution}
-    \gamma^{(4)}(s) = -\frac{1}{2\lambda} \nabla_{\gamma} c(\gamma(s))
+\frac{\partial F}{\partial\gamma}
+-
+\frac{d}{ds}
+\left(
+\frac{\partial F}{\partial\gamma'}
+\right)
++
+\frac{d^2}{ds^2}
+\left(
+\frac{\partial F}{\partial\gamma''}
+\right)
+=0.
+\end{equation}
+For the functional $F(\gamma,\gamma',\gamma'')= c(\gamma)
++\lambda|\gamma''|^2
++\mu$, we obtain
+$$
+\frac{\partial F}{\partial\gamma}
+=
+\nabla c(\gamma),
+\qquad
+\frac{\partial F}{\partial\gamma'}
+=
+0,
+\qquad
+\frac{\partial F}{\partial\gamma''}
+=
+2\lambda\gamma''.
+$$
+Substitution into the Euler--Lagrange equation therefore gives
+$$
+\nabla c(\gamma)
++
+2\lambda\gamma^{(4)}
+=
+0,
+$$
+or equivalently
+\begin{equation}
+\label{eq:ModelProblem_EL_Solution}
+\gamma^{(4)}(s)
+=
+-\frac{1}{2\lambda}
+\nabla c(\gamma(s)).
+\end{equation}
+Equation \eqref{eq:ModelProblem_EL_Solution} characterises the classical stationary paths associated with the proposed functional. In general, however, solving this equation explicitly is not straightforward. In particular, this equation is a fourth-order nonlinear system of ordinary differential equations.
+
+
+
+
+\subsection{Gaussian Hill}
+To illustrate the resulting nonlinearity, consider a uniform background cost containing a region of increased cost. A Gaussian hill provides a simple model for such a region, given by
+\begin{equation}
+\label{eq:hill_C}
+c(\gamma(s))
+=
+H\exp\left(
+-\frac{|\gamma(s)-p|^2}{2\sigma^2}
+\right),
+\end{equation}
+where $H>0$ represents the magnitude of the increase in cost, $p\in\mathbb{R}^2$ is the centre of the hill and $\sigma>0$ controls its spatial spread. If the background cost is $c_0$ and the maximum cost is $c_{\max}$, then
+$$
+H=c_{\max}-c_0.
+$$
+
+The gradient of \eqref{eq:hill_C} with respect to $\gamma$ is
+$$
+\nabla c(\gamma)
+=
+-\frac{H}{\sigma^2}
+\exp\left(
+-\frac{|\gamma-p|^2}{2\sigma^2}
+\right)
+(\gamma-p).
+$$
+Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
+\begin{equation}
+\label{eq:E_L_Gaussian}
+\gamma^{(4)}(s)
+=
+\frac{H}{2\lambda\sigma^2}
+\exp\left(
+-\frac{|\gamma(s)-p|^2}{2\sigma^2}
+\right)
+(\gamma(s)-p).
+\end{equation}
+Even for this relatively simple cost landscape, the equation \eqref{eq:E_L_Gaussian} is a nonlinear fourth-order system. Consequently, obtaining an explicit analytical solution is generally difficult and would require solving a nonlinear boundary-value problem. Rather than attempting to obtain a closed-form solution, the remainder of this chapter therefore investigates the problem from a variational perspective. In particular, we shall use the Direct Method of the Calculus of Variations to establish conditions which the functional admits a minimiser, without requiring that minimiser to be explicitly constructed. The Gaussian hill defined in \eqref{eq:hill_C} will also be used as the cost function in the numerical simulations presented later in this dissertation, \eqref{eq:hill_cost}. This provides a common cost landscape through which the analytical and numerical aspects of the problem can be considered.
+
+\section{Functional Setting}
+
+In this section, we investigate the properties of the integrand in \eqref{eq:ModelPrblem_s}. We begin by defining the set of admissible functions and explaining the choice of function space. We then examine the integrand to determine whether it satisfies the conditions required for coercivity, weak compactness, and weak lower semicontinuity. Finally, these properties are used within the Direct Method of the Calculus of Variations to establish the existence of a minimiser.
+
+
+\subsection{Existence of minimizers}
+
+In this section we state and prove the main result of this dissertation on existence of a minimizer of the problem we investigate. Instead of the Gaussian Hill function, we choose the cost function $c(\gamma(s))$ to be in the quadratic form. This allows a nonlinear modelling for the variational problem while leading to a linear Euler-Lagrange equation. 
+
+\subsubsection{Assumptions}
+
+We choose 
+\begin{equation}\label{quadratic-c}
+c(\gamma(s)) = -H(\gamma(s) - p)^2,
+\end{equation}
+where $H$ and $p$ are constants.
+
+\noindent In order to make the choice of the set of the smooth curves for \eqref{eq:ModelPrblem_s} well-defined, we define the set
+\begin{equation}\label{D}
+\mathcal{D} = \{\gamma \in C^{2}([s_0, s_1]) \colon \gamma'' \in L^2(\mathbb{R}), c(\gamma) \in L^{1}(\mathbb{R}), |\gamma'|=1\}
 \end{equation}
 
-{\color{red} I'm a bit lost on how to solve this or what we can get form this}
+\subsubsection{Convexity}
+{\color{red} The c we choose in equation (3.15) is not convex, it is concave hence there is no minimum. Do you think we can take $|c|$ in the functional? Then, it should work.}
 
-{\color{red} I did have a go with a hill function for c}
-
-to mimic the python code let $c(s)$ be {\color{red} I will re order so the python code mimics this}
+{\color{blue}I think i had my hill wrong in 3.15, would this be better? 
 \begin{equation}
-    \label{eq:hill_C}
-    c(\gamma(s)) = He^{-\frac{|\gamma(s) - p|^2}{2\sigma^2}}
-\end{equation} 
-Where $H$ is hil magnitude (as in the differance between max cost and backgound cost, $p$ is centrepoint of the hill, and $\sigma$ is the spead of the hill,
-\[
-H = c_{max} - c_0 
-\]
-\[
-p=(s_c) = (x_c,y_c)
-\]
-subing this $c$ into \eqref{eq:ModelProblem_EL_Solution} gives
-\[
-    \gamma^{(4)}(s) = \frac{H}{2\lambda\sigma^2} e^{-\frac{|\gamma(s) - p|^2}{2\sigma^2}}(\gamma(s) - p)
-\]
+c(\gamma(s))
+=
+c_{\max}
+-
+\frac{H}{R^2}
+\left|\gamma(s)-p\right|^2.
+\end{equation}
+with $R^2$ relating to radius, $C_{\max}$ being the maximum costs, $H$ as cost differance, and $p$ as centre point.}
 
-Since this is a 4th order non linear ODE we can see that typciall analyticval methods cant help us and a different method is required.
+{\color{red}This will still not work since when $\gamma$ get larger and larger (i.e. going to infinity), $c$ goes to negative infinity. I need a lower bound. Look at (3.13), when $\gamma$ goes to infinity, $c$ goes to $0$, when $\gamma$ goes to $0$, $c$ goes to a constant. }
+
+{\color{blue} Is this one any better, a rational quadratic
+\begin{equation}
+\label{eq:hill_C_rational}
+c(\gamma(s)) = 
+c_0+
+\frac{H R^2}
+{R^2+\left|\gamma(s)-p\right|^2},
+\end{equation}
+$c_0$ is background clost, $H  = c_{\text{max}} - c_0$ 
+$$
+\lim_{|\gamma|\to\infty}c(\gamma)=c_0,
+$$
+
+so that the cost is bounded below by $c_0$.
+
+The gradient of \eqref{eq:hill_C_rational} with respect to $\gamma$ is
+
+$$
+\nabla c(\gamma)
+=
+-\frac{2HR^2(\gamma-p)}
+{\left(R^2+\left|\gamma-p\right|^2\right)^2}.
+$$
+
+Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
+\begin{equation}
+\label{eq:E_L_Rational}
+\gamma^{(4)}(s)=
+\frac{HR^2}{\lambda}
+\frac{\gamma(s)-p}
+{\left(R^2+\left|\gamma(s)-p\right|^2\right)^2}.
+\end{equation}
+
+still nonlinear 4th order however
+}
+\subsubsection{Coercivity}
+
+
+
+\subsubsection{The main result}
+
+Before we state and prove the existence theorem for problem \eqref{eq:ModelPrblem_s} we note that it is not possible to apply the general existence theorem for Calculus of Variations given in Section 2.6.2. This is because the integrand in \eqref{eq:ModelPrblem_s} contains higher order derivative term due to the curvature. As a result the minimization problem differs fundamentally from the minimization problem in Thm. 2.44. 
+
+There are numerous studies in the literature on minimization problems with functionals including curvature. We will refer to the ones by Boscain, Charlot and Rossi \cite{BoscainCharlotRossi}, and Bellettini \cite{Bellettini}.
+
+\begin{theorem}
+For suitably chosen boundary conditions $a, b \in \Omega$,  problem \eqref{eq:ModelPrblem_s} admits a unique minimizer in $\mathcal{D}$, which is defined in \eqref{D}, satisfying the Euler-Lagrange equation \eqref{eq:ModelProblem_EL_Solution} with $c$ chosen as in \eqref{quadratic-c}.
+\end{theorem}
+
+
+{\color{blue}
+\textbf{I asked Chat GTP about this rational hill as a first steps/guide, is this what we'd expect to see/ want for this or should it all be ingored.}
+\begin{theorem}
+\label{thm:DirectMethod_RationalHill}
+Let $s_0<s_1$, let $A,B\in\mathbb{R}^2$ and let $v_0,v_1\in\mathbb{R}^2$. Define the admissible set
+\begin{equation}
+\label{eq:admissible_rational}
+\mathcal{A}=
+\left\{
+\gamma\in W^{2,2}((s_0,s_1);\mathbb{R}^2):
+\begin{array}{l}
+\gamma(s_0)=A,\quad \gamma(s_1)=B,\
+\gamma'(s_0)=v_0,\quad \gamma'(s_1)=v_1
+\end{array}
+\right\}.
+\end{equation}
+Let $c_0\in\mathbb{R}$, $H>0$, $R>0$ and $\lambda>0$, and define
+\begin{equation}
+\label{eq:rational_hill}
+c(\gamma) =  c_0+
+\frac{HR^2}{R^2+|\gamma-p|^2},
+\qquad p\in\mathbb{R}^2.
+\end{equation}
+Consider the functional
+\begin{equation}
+\label{eq:rational_functional}
+J[\gamma]
+=
+\int_{s_0}^{s_1}
+\left(
+c(\gamma(s))
++
+\lambda|\gamma''(s)|^2
++
+\mu
+\right),ds.
+\end{equation}
+Assume that $\mathcal{A}\neq\varnothing$. Then the problem
+\begin{equation}
+\label{eq:rational_minimisation}
+\inf_{\gamma\in\mathcal{A}}J[\gamma]
+\end{equation}
+admits a minimiser $\overline{\gamma}\in\mathcal{A}$.
+\end{theorem}
+
+\begin{proof}
+We divide the proof into three steps.
+
+\begin{enumerate}
+
+\item[(i)] \textit{Compactness.}
+
+Let
+
+$$
+m=\inf_{\gamma\in\mathcal{A}}J[\gamma].
+$$
+
+Since $\mathcal{A}\neq\varnothing$, there exists $\gamma_0\in\mathcal{A}$ and hence
+
+$$
+m\leq J[\gamma_0]<\infty.
+$$
+
+Furthermore, since $H>0$ and $R>0$,
+
+$$
+c(\gamma)
+=
+c_0+
+\frac{HR^2}{R^2+|\gamma-p|^2}
+\geq c_0.
+$$
+
+Therefore,
+
+$$
+J[\gamma]
+\geq
+\lambda\int_{s_0}^{s_1}|\gamma''(s)|^2\,ds
++
+(c_0+\mu)(s_1-s_0).
+$$
+
+Since $\lambda>0$, this provides a bound on $|\gamma''|_{L^2}$ for every minimising sequence.
+
+Let ${\gamma_\nu}\subset\mathcal{A}$ be a minimising sequence, so that
+
+$$
+J[\gamma_\nu]\longrightarrow m
+\qquad\text{as }\nu\rightarrow\infty.
+$$
+
+The preceding estimate implies that
+
+$$
+\|\gamma_\nu''\|_{L^2}
+$$
+
+is bounded. Since the endpoint values and endpoint derivatives are fixed, a second-order Poincar'e inequality gives constants $C_1,C_2>0$ such that
+
+$$
+\|\gamma_\nu\|_{W^{2,2}}
+\leq
+C_1\|\gamma_\nu''\|_{L^2}+C_2.
+$$
+
+Consequently, ${\gamma_\nu}$ is bounded in $W^{2,2}$.
+
+Since $W^{2,2}((s_0,s_1);\mathbb{R}^2)$ is reflexive, there exists a subsequence, not relabelled, and some $\overline{\gamma}\in W^{2,2}((s_0,s_1);\mathbb{R}^2)$ such that
+
+$$
+\gamma_\nu\rightharpoonup\overline{\gamma}
+\qquad\text{weakly in }W^{2,2}.
+$$
+
+Moreover, in one dimension the embedding
+
+$$
+W^{2,2}((s_0,s_1);\mathbb{R}^2)
+\hookrightarrow C^1([s_0,s_1];\mathbb{R}^2)
+$$
+
+is compact. Hence, after passing to a further subsequence if necessary,
+
+$$
+\gamma_\nu\rightarrow\overline{\gamma}
+\qquad\text{strongly in }C^1([s_0,s_1];\mathbb{R}^2).
+$$
+
+In particular, the boundary conditions are preserved, and therefore
+
+$$
+\overline{\gamma}\in\mathcal{A}.
+$$
+
+\item[(ii)] \textit{Weak lower semicontinuity.}
+
+We show that
+
+$$
+J[\overline{\gamma}]
+\leq
+\liminf_{\nu\rightarrow\infty}J[\gamma_\nu].
+$$
+
+First consider the curvature term. Since
+
+$$
+\gamma_\nu''\rightharpoonup\overline{\gamma}''
+\qquad\text{weakly in }L^2,
+$$
+
+and the function
+
+$$
+z\mapsto |z|^2
+$$
+
+is convex and weakly lower semicontinuous,
+
+$$
+\int_{s_0}^{s_1}|\overline{\gamma}''(s)|^2\,ds
+\leq
+\liminf_{\nu\rightarrow\infty}
+\int_{s_0}^{s_1}|\gamma_\nu''(s)|^2\,ds.
+$$
+
+Next consider the cost term. Since
+
+$$
+\gamma_\nu\rightarrow\overline{\gamma}
+\qquad\text{uniformly on }[s_0,s_1],
+$$
+
+and $c$ is continuous, we have
+
+$$
+c(\gamma_\nu(s))
+\rightarrow
+c(\overline{\gamma}(s))
+$$
+
+uniformly on $[s_0,s_1]$. Consequently,
+
+$$
+\int_{s_0}^{s_1}c(\gamma_\nu(s))\,ds
+\longrightarrow
+\int_{s_0}^{s_1}c(\overline{\gamma}(s))\,ds.
+$$
+
+Combining these two results with the fact that
+
+$$
+\int_{s_0}^{s_1}\mu\,ds
+=
+\mu(s_1-s_0),
+$$
+
+we obtain
+
+$$
+J[\overline{\gamma}]
+\leq
+\liminf_{\nu\rightarrow\infty}J[\gamma_\nu].
+$$
+
+\item[(iii)] \textit{Combine.}
+
+Since ${\gamma_\nu}$ is a minimising sequence,
+
+$$
+J[\gamma_\nu]\longrightarrow m.
+$$
+
+By weak lower semicontinuity,
+
+$$
+J[\overline{\gamma}]
+\leq
+\liminf_{\nu\rightarrow\infty}J[\gamma_\nu]
+=
+m.
+$$
+
+However, since $\overline{\gamma}\in\mathcal{A}$ and $m$ is the infimum of $J$ over $\mathcal{A}$,
+
+$$
+J[\overline{\gamma}]\geq m.
+$$
+
+Therefore,
+
+$$
+J[\overline{\gamma}]=m.
+$$
+
+Hence $\overline{\gamma}$ is a minimiser of \eqref{eq:rational_minimisation}.
+\end{enumerate}
+\end{proof}
+}
