@@ -11,14 +11,12 @@
             "id": "7ee26ecfe9c8c1c5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "Preliminaries/1.5 Convex Analysis.md",
-                "mode": "source",
-                "source": true
+                "file": "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf"
               },
-              "icon": "lucide-file",
-              "title": "1.5 Convex Analysis"
+              "icon": "lucide-file-text",
+              "title": "FilipRindler_IntroToModernCoV_LectureNotes"
             }
           }
         ]
@@ -186,16 +184,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "7ee26ecfe9c8c1c5",
+  "active": "4897f9265e05db76",
   "lastOpenFiles": [
+    "ReadingList/Rindler/Rindler Note.md",
+    "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
+    "TheDirectMethod/3.3 A General Existence Theorem.md",
+    "TheDirectMethod/3.2 The Model Case.md",
     "Preliminaries/1.4 Sobolev Spaces.md",
+    "TheDirectMethod/3.1 Introduction.md",
+    "TheDirectMethod/TheDirectMethod.md",
     "Preliminaries/1.5 Convex Analysis.md",
     "Supervision Meetings/Supervision Meetings.md",
-    "TheDirectMethod/3.1 Introduction.md",
-    "TheDirectMethod/3.2 The Model Case.md",
-    "TheDirectMethod/3.3 A General Existence Theorem.md",
-    "TheDirectMethod/3.4. Euler-Lagrange Equations.md",
-    "TheDirectMethod/TheDirectMethod.md",
     "ReadingList/Kielhöfer/HansjörgKielhöfer_CalculusofVariations_Book.pdf",
     "Supervision Meetings/2026-06-15 - Supervision 1 - Initial Discussion.md.md",
     "ReadingList/Rindler/FilipRindler_IntroToModernCoV_LectureNotes.pdf",
@@ -214,7 +213,6 @@
     "Untitled.base",
     "Pasted image 20260620122930.png",
     "Pasted image 20260620123117.png",
-    "ReadingList/Rindler/Rindler Note.md",
     "TheDirectMethod",
     "2026-06-24.md",
     "Preliminaries",
