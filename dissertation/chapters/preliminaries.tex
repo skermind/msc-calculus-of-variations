@@ -5,7 +5,7 @@ The Direct Method relies on several results from Functional Analysis, alongside 
 We now formulate the general form of a Calculus of Variations problem. Throughout this dissertation, we focus primarily on minimisation problems. A general model problem can be written in the form
 \begin{equation}
 \inf \left\{ I(u) = \int_\Omega f(x,u,\nabla u(x)) \, dx : u \in X \right\} = m,
-\tag{P}
+\tag{$\text{P}_\text{General}$}
 \label{eq:General_P}
 \end{equation}
 where the notation follows the formulation given by Dacorogna \cite[p.~3]{dacorogna}.
@@ -49,7 +49,7 @@ We begin with a brief overview of the Classical Method, including some examples,
 \inf \left\{
 I(u): u \in C^1([a,b]),\ u(a)=\alpha,\ u(b)=\beta
 \right\},
-\tag{P}
+\tag{B}
 \label{eq:Classical_P}
 \end{equation}
 where $f \in C^2([a,b]\times\mathbb{R}\times\mathbb{R})$ and
@@ -82,7 +82,7 @@ The following theorem provides a necessary condition for a sufficiently smooth m
         \inf_{u\in X} \left\{
         I(u) = \int_a^b f(x,u,u'(x))\,dx
         \right\} = m,
-    \tag{P}
+    \tag{$\text{P}_\text{Classical}$}
     \label{eq:E-L_P}
     \end{equation}
 where
@@ -1573,7 +1573,7 @@ In this section, we develop the Direct Method of the Calculus of Variations. The
 
 For the Direct Method, we consider the problem
 \[
-\tag{P}
+\tag{$\text{P}_\text{direct}$}
 \inf \left\{ I(u) = \int_\Omega f(x,u(x),\nabla u(x))\,dx
 : u\in u_0+W_0^{1,p}(\Omega) \right\}=m,
 \label{eq:Direct_P}
@@ -1833,7 +1833,7 @@ this implies that $\overline{u} =0$ in $(0,1)$. $\overline{u} \equiv 0$ is incom
 
 \subsection{Euler--Lagrange Equations}
 
-We now extend the Euler--Lagrange Theorem~\ref{thm:Euler-Lagrange} in the setting of the Direct Method, motivated by the general existence theorem, Theorem~\ref{thm:General_existence_theorem}. We then extend the result to minimisers in the setting of $\overline{u} \in W^{1,p}(\Omega)$.
+We now extend the Euler--Lagrange Theorem~\ref{thm:Euler-Lagrange} in the setting of the Direct Method, motivated by the general existence theorem, Theorem~\ref{thm:General_existence_theorem}. This expensions allows for minimisers in the setting of $\overline{u} \in W^{1,p}(\Omega)$.
 
 \begin{theorem}
 \label{thm:Direct_E_L}
@@ -1861,5 +1861,7 @@ $$
 \\
 Conversely, if $(u,\xi) \rightarrow f(x,u,\xi)$ is convex for every $x \in \overline{\Omega}$ and if $\overline{u}$ is a solution of either $(E_w)$ or $(E)$  then it is a minimiser of $(P)$
 \end{theorem}
+
+For a proof, see Dacorogna~\cite[p.~113]{dacorogna}.
 
 We now have all the tools we need to use the direct method for the model terrain problem. {\color{red} cite this after introis written}
