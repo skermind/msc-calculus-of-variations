@@ -169,7 +169,32 @@ class Terrain:
             self.grid,
             self.cost + hill
         )
-    
+        
+    def add_quadratic_hill(self, centre, H=0.8, R=20):
+        x_centre, y_centre = centre
+
+        # Convert physical coordinates into grid coordinates
+        x = np.linspace(0, self.width, self.resolution)
+        y = np.linspace(0, self.height, self.resolution)
+
+        X, Y = np.meshgrid(x, y)
+
+        distance_squared = (
+            (X - x_centre) ** 2
+            + (Y - y_centre) ** 2
+        )
+
+        # Quadratic rational hill
+        hill = (
+            H * R ** 2
+            / (R ** 2 + distance_squared)
+        )
+
+        # Combine with existing terrain without reducing existing costs
+        self.grid = np.maximum(
+            self.grid,
+            self.cost + hill
+        )
     def add_impassable_square(self, bottom_left, top_right):
         """
         Add a square region of impassable terrain.
