@@ -395,45 +395,9 @@ Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
 \end{equation}
 Even for this relatively simple cost landscape, the equation \eqref{eq:E_L_Gaussian} is a nonlinear fourth-order system. Consequently, obtaining an explicit analytical solution is generally difficult and would require solving a nonlinear boundary-value problem. Rather than attempting to obtain a closed-form solution, the remainder of this chapter therefore investigates the problem from a variational perspective. In particular, we shall use the Direct Method of the Calculus of Variations to establish conditions which the functional admits a minimiser, without requiring that minimiser to be explicitly constructed. The Gaussian hill defined in \eqref{eq:hill_C} will also be used as the cost function in the numerical simulations presented later in this dissertation, \eqref{eq:hill_cost}. This provides a common cost landscape through which the analytical and numerical aspects of the problem can be considered.
 
-\section{Functional Setting}
+\subsection{Rational Quadratic}
 
-In this section, we investigate the properties of the integrand in \eqref{eq:ModelPrblem_s}. We begin by defining the set of admissible functions and explaining the choice of function space. We then examine the integrand to determine whether it satisfies the conditions required for coercivity, weak compactness, and weak lower semicontinuity. Finally, these properties are used within the Direct Method of the Calculus of Variations to establish the existence of a minimiser.
-
-
-\subsection{Existence of minimizers}
-
-In this section we state and prove the main result of this dissertation on existence of a minimizer of the problem we investigate. Instead of the Gaussian Hill function, we choose the cost function $c(\gamma(s))$ to be in the quadratic form. This allows a nonlinear modelling for the variational problem while leading to a linear Euler-Lagrange equation. 
-
-\subsubsection{Assumptions}
-
-We choose 
-\begin{equation}\label{quadratic-c}
-c(\gamma(s)) = -H(\gamma(s) - p)^2,
-\end{equation}
-where $H$ and $p$ are constants.
-
-\noindent In order to make the choice of the set of the smooth curves for \eqref{eq:ModelPrblem_s} well-defined, we define the set
-\begin{equation}\label{D}
-\mathcal{D} = \{\gamma \in C^{2}([s_0, s_1]) \colon \gamma'' \in L^2(\mathbb{R}), c(\gamma) \in L^{1}(\mathbb{R}), |\gamma'|=1\}
-\end{equation}
-
-\subsubsection{Convexity}
-{\color{red} The c we choose in equation (3.15) is not convex, it is concave hence there is no minimum. Do you think we can take $|c|$ in the functional? Then, it should work.}
-
-{\color{blue}I think i had my hill wrong in 3.15, would this be better? 
-\begin{equation}
-c(\gamma(s))
-=
-c_{\max}
--
-\frac{H}{R^2}
-\left|\gamma(s)-p\right|^2.
-\end{equation}
-with $R^2$ relating to radius, $C_{\max}$ being the maximum costs, $H$ as cost differance, and $p$ as centre point.}
-
-{\color{red}This will still not work since when $\gamma$ get larger and larger (i.e. going to infinity), $c$ goes to negative infinity. I need a lower bound. Look at (3.13), when $\gamma$ goes to infinity, $c$ goes to $0$, when $\gamma$ goes to $0$, $c$ goes to a constant. }
-
-{\color{blue} Is this one any better, a rational quadratic
+Considering how the Gaussian Hill describes in \eqref{eq:hill_C}, we try a simpler function for $c$ to check the Euler-ladgrange equation. We choose $c$, 
 \begin{equation}
 \label{eq:hill_C_rational}
 c(\gamma(s)) = 
@@ -441,23 +405,19 @@ c_0+
 \frac{H R^2}
 {R^2+\left|\gamma(s)-p\right|^2},
 \end{equation}
-$c_0$ is background clost, $H  = c_{\text{max}} - c_0$ 
+Where $H>0$ represents the magnitude of the increase in cost, $p\in\mathbb{R}^2$ is the centre of the hill and $R$ is the radius. The background cost is $c_0$ and the maximum cost is $c_{\max}$, then
 $$
-\lim_{|\gamma|\to\infty}c(\gamma)=c_0,
-$$
-
-so that the cost is bounded below by $c_0$.
+H=c_{\max}-c_0.
+$$ 
 
 The gradient of \eqref{eq:hill_C_rational} with respect to $\gamma$ is
-
 $$
 \nabla c(\gamma)
 =
 -\frac{2HR^2(\gamma-p)}
 {\left(R^2+\left|\gamma-p\right|^2\right)^2}.
 $$
-
-Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
+Therefore, the Euler--Lagrange equation, \eqref{eq:ModelProblem_EL_Solution}, becomes
 \begin{equation}
 \label{eq:E_L_Rational}
 \gamma^{(4)}(s)=
@@ -466,9 +426,59 @@ Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
 {\left(R^2+\left|\gamma(s)-p\right|^2\right)^2}.
 \end{equation}
 
-still nonlinear 4th order however
-}
-\subsubsection{Coercivity}
+This is a non-linear fourth-order ordinary differential equation. Although the order of the equation cannot be reduced directly from the form of the right-hand side, its non-linear behaviour can be simplified asymptotically. In particular, when
+$$
+\left|\gamma(s)-p\right|^2 \gg R^2,
+$$
+the denominator satisfies
+$$
+\left(R^2+\left|\gamma(s)-p\right|^2\right)^2
+\sim
+\left|\gamma(s)-p\right|^4.
+$$
+Consequently,
+$$
+\gamma^{(4)}(s)
+\sim
+\frac{HR^2}{\lambda}
+\frac{\gamma(s)-p}
+{\left|\gamma(s)-p\right|^4}.
+$$
+In the scalar case, this has the asymptotic behaviour
+$$
+\gamma^{(4)}(s)
+\sim
+\frac{C}{\left(\gamma(s)-p\right)^3} \sim \frac{1}{\gamma^3},
+$$
+for an appropriate constant \(C\). Thus, far from the point \(p\), the forcing term decays cubically with the distance from \(p\). This provides a much simpler ODE to solve and analyse. 
+
+Although \eqref{eq:E_L_Rational} is a nonlinear fourth-order ordinary differential equation, its right-hand side is a smooth function of \(\gamma\). Consequently, the equation may be rewitten as a system of first-order ordinary differential equations, to which the Picard--Lindelöf theorem, Theorem 2.2~\cite{teschl2012ordinary}, applies. It follows that, for prescribed initial data
+$$
+\gamma(s_0),\qquad \gamma'(s_0),\qquad \gamma''(s_0),\qquad \gamma'''(s_0),
+$$
+there exists a unique local solution to \eqref{eq:E_L_Rational}. Thus, despite the nonlinear nature of the Euler--Lagrange equation, the corresponding initial-value problem admits a unique local solution.
+
+{\color{blue} Will test and write a short paragraph showing it works for the numerics, and link to the jpyner notepad. might put in the numerical chapter}
+
+\section{Functional Setting}
+
+In this section, we investigate the properties of the integrand in \eqref{eq:ModelPrblem_s}. We begin by defining the set of admissible functions and explaining the choice of function space. We then examine the integrand to determine whether it satisfies the conditions required for coercivity, weak compactness, and weak lower semicontinuity. Finally, these properties are used within the Direct Method of the Calculus of Variations to establish the existence of a minimiser.
+
+
+\subsection{Existence of minimizers}
+
+In this section we state and prove the main result of this dissertation on existence of a minimizer of the problem we investigate. Instead of the Gaussian Hill function, we choose the cost function $c(\gamma(s))$ to be in the quadratic form. 
+
+\subsubsection{Assumptions}
+
+
+
+
+\noindent In order to make the choice of the set of the smooth curves for \eqref{eq:ModelPrblem_s} well-defined, we define the set
+\begin{equation}\label{D}
+\mathcal{D} = \{\gamma \in C^{2}([s_0, s_1]) \colon \gamma'' \in L^2(\mathbb{R}), c(\gamma) \in L^{1}(\mathbb{R}), |\gamma'|=1\}
+\end{equation}
+
 
 
 

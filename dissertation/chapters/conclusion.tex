@@ -1,3 +1,15 @@
+This dissertation has investigated an application of the Direct Method of the Calculus of Variations to a terrain-based path-planning problem. The core objective was to develop a variational model that considered terrain cost, path curvature and path length, and to investigate both the existence of minimisers and their numerical approximation.
+
+The problem provides an example of the complementary roles of analytical and numerical methods in the Calculus of Variations. The Direct Method was used to establish conditions that minimiser exists, while numerical optimisation was used to find an approximate low-cost path.
+
+\section{Theoretical Conclusions}
+
+The proposed path-planning problem was formulated as a second-order variational problem. Applying the Classical Method to the corresponding functional leads to a fourth order Euler--Lagrange equation. Even for relatively simple choices of the terrain cost function, this still produces a nonlinear fourth-order boundary-value problem, making the an analytical solution difficult.
+
+The Direct Method provides tool for showing existence of a minimiser. The existence result demonstrates that the infimum of the continuous functional is possible. However, the Direct Method does not provide an explicit path, and in this case, the results obtained do not establish uniqueness. Depending on the terrain cost field and the geometry of the problem, there may be multiple minimisers.
+
+\section{Numerical Conclusions}
+
 The numerical experiments presented in this chapter provide a
 controlled environment for investigating the proposed cost functional
 and optimisation method. The terrain model is intentionally simplified
@@ -6,7 +18,9 @@ realistic railway or road planning model.
 
 \section{Limitations}
 
-The discretisation provides only an approximation to the continuous
+The present work has several limitations. From a theoretical perspective, the existence results do not establish uniqueness or provide an explicit solution to the path-planning problem. Consequently, although the Direct Method establishes that a minimiser exists under the stated assumptions, it does not determine its precise form.
+
+From a numerical perspective, the discretisation provides only an approximation to the continuous
 problem, with the curvature term in particular represented using a
 finite-difference substitute. Simulated annealing also provides no
 guarantee of finding a global minimiser, and the results may depend on
@@ -26,7 +40,9 @@ computational cost and provide a more demanding test of the method.
 
 \section{Further Work}
 
-A natural extension would be a systematic investigation of the
+A natural direction for further theoretical work would be to investigate stronger conditions under which additional properties of the minimisers could be established. In particular, it would be interesting to investigate whether further assumptions on the terrain cost function or the functional could provide information about uniqueness, regularity or the qualitative properties of minimising paths. Is there a $c$ that can lead to a reducded order Euler--Lagrange Equation?
+
+Numerically, a natural extension would be a systematic investigation of the
 parameter space to better understand the trade-off between terrain
 cost, curvature and path length. The numerical implementation could
 also be refactored using the lessons learned during its development,
@@ -48,13 +64,10 @@ method to be tested on realistic route-planning problems.
 
 \section{Concluding Remarks}
 
-Despite these limitations, the numerical experiments demonstrate that
-including terrain, curvature and length costs can produce non-trivial
-paths for which the straight-line route is not necessarily optimal.
-The experiments therefore provide numerical evidence supporting the
-motivation for the model developed in this dissertation. They also
-illustrate the complementary roles of the direct method, which
-provides a theoretical framework for the existence of minimisers, and
-numerical optimisation, which allows their approximate form to be
-investigated computationally.
+This dissertation has shown how the Direct Method of the Calculus of Variations can be applied to a path-planning problem for which the Euler--Lagrange equation is too difficult to solve. 
 
+The Direct Method provides an alternative analytical method by establishing conditions under which the continuous variational problem possesses at least one minimiser. Although this does not establish uniqueness or provide an explicit solution, it demonstrates that there is a minimising path to be approximated and provides a theoretical foundation for further numerical investigation.
+
+The numerical experiments then provide a insight to what a optimal path may look like. They demonstrate how terrain, curvature and path length can interact to produce non-trivial low-cost paths. The paths produced by simulated annealing remain approximations and cannot be assumed to be global minimisers of the original continuous functional.
+
+Overall, the analytical and numerical components of this dissertation serve complementary purposes. The Direct Method establishes that minimiser exists, while numerical optimisation provides a practical means of investigating the approximate form of the low-cost paths. Together, these approaches connect the existence of optimal paths with their numerical approximation and shows the value in combining variational analysis with numerical optimisation in the study of path-planning problems.
