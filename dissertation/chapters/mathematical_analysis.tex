@@ -6,7 +6,7 @@ J[\gamma(s)]
 =
 \underset{\gamma \in \Omega}{\min} \int_{s_0}^{s_1}
 \left(
-c(\gamma(s))
+w_c c(\gamma(s))
 +
 \lambda |\gamma''(s)|^2
 +
@@ -56,7 +56,7 @@ are therefore more costly for the path to traverse. The cost incurred
 by a path due solely to the terrain is given by the line integral
 \begin{equation}
 J_{\mathrm{terrain}}(\gamma) = 
-\int_\gamma c(x,y),ds.
+w_c\int_\gamma c(x,y),ds.
 \label{eq:terrain_functional}
 \end{equation}
 
@@ -74,7 +74,7 @@ The resulting functional is defined by
 J(\gamma) = 
 \int_\gamma
 \left[
-c(x,y)
+w_cc(x,y)
 +
 \lambda\kappa^2
 +
@@ -83,7 +83,7 @@ c(x,y)
 }
 \label{eq:ModelProblem}
 \end{equation}
-where $\lambda$, and $\mu$ are non-negative parameters controlling
+where $w_c$, $\lambda$, and $\mu$ are non-negative parameters controlling
 the contribution of the terms of the integrand. These terms represent terrain cost, curvature, and length,
 respectively.
 
@@ -138,10 +138,11 @@ terrain.
 Consequently, the terrain component of the functional becomes
 
 $$
-\int_\gamma c(x,y)\,ds
+w_c\int_\gamma c(x,y)\,ds
 =
-\int_{s_0}^{s_1}c(\gamma(s))\,ds.
+w_c\int_{s_0}^{s_1}c(\gamma(s))\,ds.
 $$
+The parameter $w_c \geq 0$ controls the relative importance of the cost field within the functional.
 
 \subsection{Path Length Term}
 \label{subsec:length_penalty}
@@ -282,7 +283,7 @@ direction, while assigning a greater cost to regions where the path
 bends more sharply. The parameter $\lambda\geq0$ therefore controls the
 relative importance of path smoothness within the functional.
 
-\section{Euler--Lagrange Equations - Classical Approach}
+\section{Euler--Lagrange Equation - Classical Approach}
 
 As established in the previous section, the proposed path-planning problem can be expressed in terms of the arc-length parameter $s$. Recalling \eqref{eq:ModelPrblem_s}, the functional is given by
 \begin{equation}
@@ -290,7 +291,7 @@ J[\gamma]
 =
 \int_{s_0}^{s_1}
 \left(
-c(\gamma(s))
+w_c c(\gamma(s))
 +
 \lambda |\gamma''(s)|^2
 +
@@ -326,7 +327,7 @@ For the functional $F(\gamma,\gamma',\gamma'')= c(\gamma)
 $$
 \frac{\partial F}{\partial\gamma}
 =
-\nabla c(\gamma),
+w_c\nabla c(\gamma),
 \qquad
 \frac{\partial F}{\partial\gamma'}
 =
@@ -338,7 +339,7 @@ $$
 $$
 Substitution into the Euler--Lagrange equation therefore gives
 $$
-\nabla c(\gamma)
+w_c\nabla c(\gamma)
 +
 2\lambda\gamma^{(4)}
 =
@@ -349,11 +350,22 @@ or equivalently
 \label{eq:ModelProblem_EL_Solution}
 \gamma^{(4)}(s)
 =
--\frac{1}{2\lambda}
+-\frac{w_c}{2\lambda}
 \nabla c(\gamma(s)).
 \end{equation}
-Equation \eqref{eq:ModelProblem_EL_Solution} characterises the classical stationary paths associated with the proposed functional. In general, however, solving this equation explicitly is not straightforward. In particular, this equation is a fourth-order nonlinear system of ordinary differential equations.
+For convenience, define the constant
 
+$$
+\alpha := \frac{w_c}{2\lambda}.
+$$
+Thus, \eqref{eq:ModelProblem_EL_Solution} can be written more compactly as
+\begin{equation}
+\label{eq:ModelProblem_EL_Solution_Alpha}
+\gamma^{(4)}(s)
+=
+-\alpha\nabla c(\gamma(s)).
+\end{equation}
+Equation \eqref{eq:ModelProblem_EL_Solution_Alpha} characterises the classical stationary paths associated with the proposed functional. In general, however, solving this equation explicitly is not straightforward. In particular, this equation is a fourth-order nonlinear system of ordinary differential equations..
 
 
 
@@ -371,7 +383,6 @@ where $H>0$ represents the magnitude of the increase in cost, $p\in\mathbb{R}^2$
 $$
 H=c_{\max}-c_0.
 $$
-
 The gradient of \eqref{eq:hill_C} with respect to $\gamma$ is
 $$
 \nabla c(\gamma)
@@ -382,12 +393,12 @@ $$
 \right)
 (\gamma-p).
 $$
-Therefore, equation \eqref{eq:ModelProblem_EL_Solution} becomes
+Therefore, equation \eqref{eq:ModelProblem_EL_Solution_Alpha} becomes
 \begin{equation}
 \label{eq:E_L_Gaussian}
 \gamma^{(4)}(s)
 =
-\frac{H}{2\lambda\sigma^2}
+\frac{\alpha H}{\sigma^2}
 \exp\left(
 -\frac{|\gamma(s)-p|^2}{2\sigma^2}
 \right)
@@ -397,7 +408,7 @@ Even for this relatively simple cost landscape, the equation \eqref{eq:E_L_Gauss
 
 \subsection{Rational Quadratic}
 
-Considering how the Gaussian Hill describes in \eqref{eq:hill_C}, we try a simpler function for $c$ to check the Euler-ladgrange equation. We choose $c$, 
+Considering how the Gaussian Hill, described in \eqref{eq:hill_C}, leads to a difficult fourth-order ODE, we try a simpler function for $c$ to check the Euler-ladgrange equation. We choose $c$, 
 \begin{equation}
 \label{eq:hill_C_rational}
 c(\gamma(s)) = 
@@ -409,7 +420,6 @@ Where $H>0$ represents the magnitude of the increase in cost, $p\in\mathbb{R}^2$
 $$
 H=c_{\max}-c_0.
 $$ 
-
 The gradient of \eqref{eq:hill_C_rational} with respect to $\gamma$ is
 $$
 \nabla c(\gamma)
@@ -417,12 +427,11 @@ $$
 -\frac{2HR^2(\gamma-p)}
 {\left(R^2+\left|\gamma-p\right|^2\right)^2}.
 $$
-Therefore, the Euler--Lagrange equation, \eqref{eq:ModelProblem_EL_Solution}, becomes
+Therefore, the Euler--Lagrange equation, \eqref{eq:ModelProblem_EL_Solution_Alpha}, becomes
 \begin{equation}
 \label{eq:E_L_Rational}
 \gamma^{(4)}(s)=
-\frac{HR^2}{\lambda}
-\frac{\gamma(s)-p}
+\frac{(2HR^2\alpha)(\gamma(s)-p)}
 {\left(R^2+\left|\gamma(s)-p\right|^2\right)^2}.
 \end{equation}
 
@@ -440,8 +449,7 @@ Consequently,
 $$
 \gamma^{(4)}(s)
 \sim
-\frac{HR^2}{\lambda}
-\frac{\gamma(s)-p}
+\frac{(2HR^2\alpha)(\gamma(s)-p)}
 {\left|\gamma(s)-p\right|^4}.
 $$
 In the scalar case, this has the asymptotic behaviour
@@ -452,85 +460,73 @@ $$
 $$
 for an appropriate constant \(C\). Thus, far from the point \(p\), the forcing term decays cubically with the distance from \(p\). This provides a much simpler ODE to solve and analyse. 
 
-Although \eqref{eq:E_L_Rational} is a nonlinear fourth-order ordinary differential equation, its right-hand side is a smooth function of \(\gamma\). Consequently, the equation may be rewitten as a system of first-order ordinary differential equations, to which the Picard--Lindelöf theorem, Theorem 2.2~\cite{teschl2012ordinary}, applies. It follows that, for prescribed initial data
+Although \eqref{eq:E_L_Rational} is a non-linear fourth-order ordinary differential equation, its right-hand side is a smooth function of \(\gamma\). Consequently, the equation may be revised as a system of first-order ordinary differential equations, to which the Picard--Lindelöf theorem, Theorem 2.2~\cite{teschl2012ordinary}, applies. It follows that, for prescribed initial data
 $$
 \gamma(s_0),\qquad \gamma'(s_0),\qquad \gamma''(s_0),\qquad \gamma'''(s_0),
 $$
-there exists a unique local solution to \eqref{eq:E_L_Rational}. Thus, despite the nonlinear nature of the Euler--Lagrange equation, the corresponding initial-value problem admits a unique local solution.
+there exists a unique local solution to \eqref{eq:E_L_Rational}. Thus, despite the non-linear nature of the Euler--Lagrange equation, the corresponding initial-value problem admits a unique local solution.
 
-{\color{blue} Will test and write a short paragraph showing it works for the numerics, and link to the jpyner notepad. might put in the numerical chapter}
-
-\section{Functional Setting}
-
-In this section, we investigate the properties of the integrand in \eqref{eq:ModelPrblem_s}. We begin by defining the set of admissible functions and explaining the choice of function space. We then examine the integrand to determine whether it satisfies the conditions required for coercivity, weak compactness, and weak lower semicontinuity. Finally, these properties are used within the Direct Method of the Calculus of Variations to establish the existence of a minimiser.
+The quadratic rational hill was also tested numerically, producing results comparable to those obtained for the Gaussian hill. A detailed discussion of Gaussian hill experiments is deferred to Chapter 4. I will not be describing the quadratic rational hill in details however the implementation and numerical experiments are provided in the accompanying GitHub repository~\cite{skerman2026calculus}.
 
 
-\subsection{Existence of minimizers}
+\section{Existence Theorem - Direct Approach}
 
-In this section we state and prove the main result of this dissertation on existence of a minimizer of the problem we investigate. Instead of the Gaussian Hill function, we choose the cost function $c(\gamma(s))$ to be in the quadratic form. 
-
-\subsubsection{Assumptions}
+In this chapter, we set out an existence theorem for our path planning problem, together with its proof. The theorem focuses on the rational hill function for $c$ given by \eqref{eq:rational_hill}. We begin with a brief discussion of the challenges involved in establishing existence for this problem and why the general theorems presented by Dacorogna cannot be applied directly. We then formulate the theorem, specifying the different components of the functional and the assumptions required. The main idea behind the theorem is that a minimiser of the functional exists within the chosen admissible set. Finally, we prove the result by following a similar approach to that used in the proof of existence for the Dirichlet integral in Theorem \ref{thm:Direclet integral Therom}.
 
 
+\begin{remark}
+    Before we state and prove the existence theorem for problem \eqref{eq:ModelPrblem_s} we note that it is not possible to apply the general existence theorem for Calculus of Variations given in Section \ref{sec:The_Direct_Method} This is because the integrand in \eqref{eq:ModelPrblem_s} contains higher order derivative term due to the curvature. As a result the minimization problem differs fundamentally from the minimization problem in Theorem \ref{thm:General_existence_theorem}. There are numerous studies in the literature on minimization problems with functionals including curvature. However, their setting and the analysis involved is out of the scope of this dissertation. For completeness, we refer the interested readers to the work of Boscain, Charlot and Rossi \cite{BoscainCharlotRossi}, and Bellettini \cite{Bellettini}.
+\end{remark}
 
 
-\noindent In order to make the choice of the set of the smooth curves for \eqref{eq:ModelPrblem_s} well-defined, we define the set
-\begin{equation}\label{D}
-\mathcal{D} = \{\gamma \in C^{2}([s_0, s_1]) \colon \gamma'' \in L^2(\mathbb{R}), c(\gamma) \in L^{1}(\mathbb{R}), |\gamma'|=1\}
-\end{equation}
-
-
-
-
-\subsubsection{The main result}
-
-Before we state and prove the existence theorem for problem \eqref{eq:ModelPrblem_s} we note that it is not possible to apply the general existence theorem for Calculus of Variations given in Section 2.6.2. This is because the integrand in \eqref{eq:ModelPrblem_s} contains higher order derivative term due to the curvature. As a result the minimization problem differs fundamentally from the minimization problem in Thm. 2.44. 
-
-There are numerous studies in the literature on minimization problems with functionals including curvature. We will refer to the ones by Boscain, Charlot and Rossi \cite{BoscainCharlotRossi}, and Bellettini \cite{Bellettini}.
+We now state and prove the existence result. 
 
 \begin{theorem}
-For suitably chosen boundary conditions $a, b \in \Omega$,  problem \eqref{eq:ModelPrblem_s} admits a unique minimizer in $\mathcal{D}$, which is defined in \eqref{D}, satisfying the Euler-Lagrange equation \eqref{eq:ModelProblem_EL_Solution} with $c$ chosen as in \eqref{quadratic-c}.
-\end{theorem}
-
-
-{\color{blue}
-\textbf{I asked Chat GTP about this rational hill as a first steps/guide, is this what we'd expect to see/ want for this or should it all be ingored.}
-\begin{theorem}
-\label{thm:DirectMethod_RationalHill}
-Let $s_0<s_1$, let $A,B\in\mathbb{R}^2$ and let $v_0,v_1\in\mathbb{R}^2$. Define the admissible set
-\begin{equation}
-\label{eq:admissible_rational}
-\mathcal{A}=
-\left\{
-\gamma\in W^{2,2}((s_0,s_1);\mathbb{R}^2):
-\begin{array}{l}
-\gamma(s_0)=A,\quad \gamma(s_1)=B,\
-\gamma'(s_0)=v_0,\quad \gamma'(s_1)=v_1
-\end{array}
-\right\}.
-\end{equation}
-Let $c_0\in\mathbb{R}$, $H>0$, $R>0$ and $\lambda>0$, and define
-\begin{equation}
-\label{eq:rational_hill}
-c(\gamma) =  c_0+
-\frac{HR^2}{R^2+|\gamma-p|^2},
-\qquad p\in\mathbb{R}^2.
-\end{equation}
-Consider the functional
+We consider the functional
 \begin{equation}
 \label{eq:rational_functional}
 J[\gamma]
 =
 \int_{s_0}^{s_1}
 \left(
-c(\gamma(s))
+w_c c(\gamma(s))
 +
 \lambda|\gamma''(s)|^2
 +
 \mu
-\right),ds.
+\right),ds,
 \end{equation}
-Assume that $\mathcal{A}\neq\varnothing$. Then the problem
+where $s\in[s_0,s_1]$ denotes the curve parameter and
+$\gamma:[s_0,s_1]\to\mathbb{R}^2$ represents the parametrised path. The terrain cost is modelled by a rational hill of the form
+\begin{equation}
+\label{eq:rational_hill}
+c(x)
+=c_0+
+\frac{HR^2}{R^2+|x-p|^2},
+\qquad p\in\mathbb{R}^2,
+\end{equation}
+where $c_0\geq0$ represents the baseline terrain cost, $H>0$ represents the maximum additional cost associated with the hill, $R>0$ determines its characteristic radius, and $p$ denotes the centre of the hill.
+
+Let $s_0<s_1$, let $A,B\in\mathbb{R}^2$ be prescribed boundary points, and let $v_0,v_1\in\mathbb{R}^2$ be prescribed boundary velocities. We define the admissible class
+\begin{equation}
+\label{eq:admissible_rational}
+\mathcal{A}
+=
+\left\{
+\gamma\in W^{2,2}((s_0,s_1);\mathbb{R}^2):
+\gamma(s_0)=A,,
+\gamma(s_1)=B,,
+\gamma'(s_0)=v_0,,
+\gamma'(s_1)=v_1
+\right\}.
+\end{equation}
+We define the constants so that
+$$
+w_c\geq0,\qquad
+\lambda>0,\qquad
+\mu\geq0.
+$$
+We assume $\mathcal{A}\neq\varnothing$. Then the minimisation problem
 \begin{equation}
 \label{eq:rational_minimisation}
 \inf_{\gamma\in\mathcal{A}}J[\gamma]
@@ -539,198 +535,216 @@ admits a minimiser $\overline{\gamma}\in\mathcal{A}$.
 \end{theorem}
 
 \begin{proof}
-We divide the proof into three steps.
-
+    We divide the proof into three steps 
 \begin{enumerate}
+        \item[(i)] \textit{Compactness}
+        
+        Let
+        $$
+        m=\inf_{\gamma\in\mathcal{A}}J[\gamma].
+        $$
+        
+        Since $\mathcal{A}\neq\varnothing$, there exists $\gamma_0\in\mathcal{A}$ and hence
+        $$
+        m\leq J[\gamma_0]<\infty.
+        $$
+        
+        Since $H>0$ and $R>0$,
+        $$
+        c(\gamma)
+        =
+        c_0+
+        \frac{HR^2}{R^2+|\gamma-p|^2}
+        \geq c_0.
+        $$
+        
+        Therefore,
+        $$
+        J[\gamma]
+        \geq
+        \lambda\int_{s_0}^{s_1}|\gamma''(s)|^2\,ds
+        +
+        (w_cc_0+\mu)(s_1-s_0).
+        $$
+        We let ${\gamma_\nu}\subset\mathcal{A}$ be a minimising sequence, so that
+        $$
+        J[\gamma_\nu]\longrightarrow m
+        \qquad\text{as }\nu\rightarrow\infty.
+        $$
 
-\item[(i)] \textit{Compactness.}
+        At some point we reach
+        \[
+        J[\gamma_\nu] \leq m +1.
+        \]
+        Therefore,
+        \[
+        \lambda\int_{s_0}^{s_1}|\gamma''(s)|^2\,ds
+        \leq m+1 -
+        (w_cc_0+\mu)(s_1-s_0).
+        \]
+        Using the definition of the Lebesgue norm, Definition \ref{def:L^P Space}, choosing an appropriate constant $C$, alongside $\lambda>0$ we have
+        $$
+        \|\gamma_\nu''\|_{L^2} \leq \sqrt{C},
+        $$
+        meaning $\|\gamma_\nu''\|_{L^2}$ is bounded. Since the endpoint values and endpoint derivatives are fixed, we can apply the Poincar\'e inequality, Theorem \ref{thm:Poincare Inequality}, subsequently on $\gamma$ and $\gamma '$. This gives constants $C_1,C_2>0$ such that
+        
+        $$
+        \|\gamma_\nu\|_{W^{2,2}}
+        \leq
+        C_1\|\gamma_\nu''\|_{L^2}+C_2.
+        $$
+        
+        Consequently, ${\gamma_\nu}$ is bounded in $W^{2,2}$.
+        
+        Since $W^{2,2}((s_0,s_1);\mathbb{R}^2)$ is reflexive, there exists a subsequence, not relabelled, and some $\overline{\gamma}\in W^{2,2}((s_0,s_1);\mathbb{R}^2)$ such that
+        $$
+        \gamma_\nu\rightharpoonup\overline{\gamma}
+        \qquad\text{weakly in }W^{2,2}.
+        $$
+        
+        Moreover, since
+        $$
+        \gamma\in W^{2,2}((s_0,s_1);\mathbb{R}^2),
+        $$
+        we also have
+        $$
+        \gamma'\in W^{1,2}((s_0,s_1);\mathbb{R}^2).
+        $$
+        Here, the domain of $\gamma'$ is the one-dimensional interval
+        $(s_0,s_1)\subset\mathbb{R}$, so $n=1$, while the exponent in
+        $W^{1,2}$ gives $p=2$. Thus, applying Case 3 of the Sobolev embedding theorem,
+        Theorem~\ref{thm:embedding},
+        $$
+        \gamma'\in C^{0,\alpha}([s_0,s_1];\mathbb{R}^2),
+        \qquad 0\leq\alpha\leq\frac{1}{2}.
+        $$
+        Since $C^{0,\alpha} \subset C^0$ and that $\gamma'$ is continuous, we have
+        $$
+        \gamma\in C^1([s_0,s_1];\mathbb{R}^2).
+        $$
+        Therefore, the corresponding Sobolev embedding is compact, so
+        $$
+        W^{2,2}((s_0,s_1);\mathbb{R}^2)
+        \subset C^1([s_0,s_1];\mathbb{R}^2).
+        $$
 
-Let
+        After passing to a further subsequence if necessary,
+        $$
+        \gamma_\nu\rightarrow\overline{\gamma}
+        \qquad\text{strongly in }C^1([s_0,s_1];\mathbb{R}^2).
+        $$
+        
+        Due to the strong convergence in $C^1$, the boundary conditions in $\mathcal{A}$ are preserved, and therefore
+        $$
+        \overline{\gamma}\in\mathcal{A}.
+        $$
 
-$$
-m=\inf_{\gamma\in\mathcal{A}}J[\gamma].
-$$
+        
+        \item[(ii)] \textit{Lower Semicontinuity}
 
-Since $\mathcal{A}\neq\varnothing$, there exists $\gamma_0\in\mathcal{A}$ and hence
+        We want to show that
+        
+        $$
+        J[\overline{\gamma}]
+        \leq
+        \lim_{\nu\rightarrow\infty}\inf J[\gamma_\nu].
+        $$
+        
+        First consider the curvature term. Since
+        
+        $$
+        \gamma_\nu''\rightharpoonup\overline{\gamma}''
+        \qquad\text{weakly in }L^2,
+        $$
+        
+        and the function
+        
+        $$
+        x\mapsto |x|^2
+        $$
+        
+        is convex and weakly lower semicontinuous, we have
+        
+        $$
+        \int_{s_0}^{s_1}|\overline{\gamma}''(s)|^2\,ds
+        \leq
+        \lim_{\nu\rightarrow\infty} \inf
+        \int_{s_0}^{s_1}|\gamma_\nu''(s)|^2\,ds.
+        $$
+        
+        Next consider the cost term. Since
+        
+        $$
+        \gamma_\nu\rightarrow\overline{\gamma}
+        \qquad\text{uniformly on }[s_0,s_1],
+        $$
+        
+        and $c$ is continuous, we have
+        
+        $$
+        c(\gamma_\nu(s))
+        \rightarrow
+        c(\overline{\gamma}(s))
+        $$
+        
+        uniformly on $[s_0,s_1]$. Consequently,
+        
+        $$
+        \int_{s_0}^{s_1}c(\gamma_\nu(s))\,ds
+        \longrightarrow
+        \int_{s_0}^{s_1}c(\overline{\gamma}(s))\,ds.
+        $$
+        
+        Combining these two results with the fact that for the final term we have,
 
-$$
-m\leq J[\gamma_0]<\infty.
-$$
+        $$
+        \int_{s_0}^{s_1}\mu\,ds
+        =
+        \mu(s_1-s_0).
+        $$
+        
+        We obtain
+        $$
+        J[\overline{\gamma}]
+        \leq
+        \lim_{\nu\rightarrow\infty}\inf J[\gamma_\nu].
+        $$
 
-Furthermore, since $H>0$ and $R>0$,
+        
 
-$$
-c(\gamma)
-=
-c_0+
-\frac{HR^2}{R^2+|\gamma-p|^2}
-\geq c_0.
-$$
+        \item[(iii)] \textit{Combine}
 
-Therefore,
+        Since ${\gamma_\nu}$ is a minimising sequence,
 
-$$
-J[\gamma]
-\geq
-\lambda\int_{s_0}^{s_1}|\gamma''(s)|^2\,ds
-+
-(c_0+\mu)(s_1-s_0).
-$$
+        $$
+        J[\gamma_\nu]\longrightarrow m.
+        $$
+        
+        By weak lower semicontinuity,
+        
+        $$
+        J[\overline{\gamma}]
+        \leq
+        \lim_{\nu\rightarrow\infty}\inf J[\gamma_\nu]
+        =
+        m.
+        $$
+        
+        However, since $\overline{\gamma}\in\mathcal{A}$ and $m$ is the infimum of $J$ over $\mathcal{A}$,
+        
+        $$
+        J[\overline{\gamma}]\geq m.
+        $$
+        
+        Therefore,
+        
+        $$
+        J[\overline{\gamma}]=m.
+        $$
+        
+        Hence $\overline{\gamma}$ is a minimiser of \eqref{eq:rational_functional}.
 
-Since $\lambda>0$, this provides a bound on $|\gamma''|_{L^2}$ for every minimising sequence.
-
-Let ${\gamma_\nu}\subset\mathcal{A}$ be a minimising sequence, so that
-
-$$
-J[\gamma_\nu]\longrightarrow m
-\qquad\text{as }\nu\rightarrow\infty.
-$$
-
-The preceding estimate implies that
-
-$$
-\|\gamma_\nu''\|_{L^2}
-$$
-
-is bounded. Since the endpoint values and endpoint derivatives are fixed, a second-order Poincar'e inequality gives constants $C_1,C_2>0$ such that
-
-$$
-\|\gamma_\nu\|_{W^{2,2}}
-\leq
-C_1\|\gamma_\nu''\|_{L^2}+C_2.
-$$
-
-Consequently, ${\gamma_\nu}$ is bounded in $W^{2,2}$.
-
-Since $W^{2,2}((s_0,s_1);\mathbb{R}^2)$ is reflexive, there exists a subsequence, not relabelled, and some $\overline{\gamma}\in W^{2,2}((s_0,s_1);\mathbb{R}^2)$ such that
-
-$$
-\gamma_\nu\rightharpoonup\overline{\gamma}
-\qquad\text{weakly in }W^{2,2}.
-$$
-
-Moreover, in one dimension the embedding
-
-$$
-W^{2,2}((s_0,s_1);\mathbb{R}^2)
-\hookrightarrow C^1([s_0,s_1];\mathbb{R}^2)
-$$
-
-is compact. Hence, after passing to a further subsequence if necessary,
-
-$$
-\gamma_\nu\rightarrow\overline{\gamma}
-\qquad\text{strongly in }C^1([s_0,s_1];\mathbb{R}^2).
-$$
-
-In particular, the boundary conditions are preserved, and therefore
-
-$$
-\overline{\gamma}\in\mathcal{A}.
-$$
-
-\item[(ii)] \textit{Weak lower semicontinuity.}
-
-We show that
-
-$$
-J[\overline{\gamma}]
-\leq
-\liminf_{\nu\rightarrow\infty}J[\gamma_\nu].
-$$
-
-First consider the curvature term. Since
-
-$$
-\gamma_\nu''\rightharpoonup\overline{\gamma}''
-\qquad\text{weakly in }L^2,
-$$
-
-and the function
-
-$$
-z\mapsto |z|^2
-$$
-
-is convex and weakly lower semicontinuous,
-
-$$
-\int_{s_0}^{s_1}|\overline{\gamma}''(s)|^2\,ds
-\leq
-\liminf_{\nu\rightarrow\infty}
-\int_{s_0}^{s_1}|\gamma_\nu''(s)|^2\,ds.
-$$
-
-Next consider the cost term. Since
-
-$$
-\gamma_\nu\rightarrow\overline{\gamma}
-\qquad\text{uniformly on }[s_0,s_1],
-$$
-
-and $c$ is continuous, we have
-
-$$
-c(\gamma_\nu(s))
-\rightarrow
-c(\overline{\gamma}(s))
-$$
-
-uniformly on $[s_0,s_1]$. Consequently,
-
-$$
-\int_{s_0}^{s_1}c(\gamma_\nu(s))\,ds
-\longrightarrow
-\int_{s_0}^{s_1}c(\overline{\gamma}(s))\,ds.
-$$
-
-Combining these two results with the fact that
-
-$$
-\int_{s_0}^{s_1}\mu\,ds
-=
-\mu(s_1-s_0),
-$$
-
-we obtain
-
-$$
-J[\overline{\gamma}]
-\leq
-\liminf_{\nu\rightarrow\infty}J[\gamma_\nu].
-$$
-
-\item[(iii)] \textit{Combine.}
-
-Since ${\gamma_\nu}$ is a minimising sequence,
-
-$$
-J[\gamma_\nu]\longrightarrow m.
-$$
-
-By weak lower semicontinuity,
-
-$$
-J[\overline{\gamma}]
-\leq
-\liminf_{\nu\rightarrow\infty}J[\gamma_\nu]
-=
-m.
-$$
-
-However, since $\overline{\gamma}\in\mathcal{A}$ and $m$ is the infimum of $J$ over $\mathcal{A}$,
-
-$$
-J[\overline{\gamma}]\geq m.
-$$
-
-Therefore,
-
-$$
-J[\overline{\gamma}]=m.
-$$
-
-Hence $\overline{\gamma}$ is a minimiser of \eqref{eq:rational_minimisation}.
 \end{enumerate}
 \end{proof}
-}
+
+From this proof, we have established that a minimiser exists for this path planning problem under the conditions set out. However, we do not know if this minimiser is unique or whether it satisfies the Euler--Lagrange equation. This could be investigated further. Nevertheless, knowing that a minimiser exists provides a theoretical basis for the numerical simulations considered in the following chapter. We can use this confidence to obtain an approximation to a minimising path.
