@@ -1448,6 +1448,19 @@ we conclude that
 This example shows that increasing $k$ asks for stronger regularity on a function. Even though $u(x)=|x|$ has a weak first derivative and belongs to $W^{1,p}(-1,1)$, it does not allow a second weak derivative in $L^p(-1,1)$ and so it cannot belong to any $W^{k,p}(-1,1)$ with $k>1$.
 \end{example}
 
+Another useful theorem which we will use is the Sobolev imbedding theorem, we only care for case 3 from Theorem 1.44 from Dacorogna \cite{dacorogna}.
+\begin{theorem}[Sobolev embedding theorem]
+\label{thm:embedding}
+Let $\Omega \subset \mathbb{R}^2$ be a bounded open set with Lipschitz boundary.
+\begin{enumerate}
+    \item [Case 3.] If $p>n$ then
+    \[
+    W^{1,p}(\Omega) \subset C^{0,\alpha}(\overline{\Omega}), \quad \text{for every } \alpha \in [o,1-n/p].
+    \]
+\end{enumerate}
+\end{theorem}
+
+
 \subsection{Poincar\'e Inequality}
 
 \begin{theorem}
@@ -1567,6 +1580,7 @@ We can also verify this visually, as illustrated in Figure~\ref{fig:convex_funct
 \end{theorem}
 
 \section{The Direct Method}
+\label{sec:The_Direct_Method}
 
 In this section, we develop the Direct Method of the Calculus of Variations. The Direct Method provides a framework for proving the existence of minimisers for a given functional and the conditions under which minimisers exist. We start by extending the model problem, (\ref{eq:Classical_P}), introduced at the beginning of the chapter, building on the theory of Sobolev spaces developed in Section \ref{sec:Sobolev_Spaces}. We then consider model problems to develop an intuition for the method. Following this, we introduce the main existence results and derive the Euler--Lagrange equation for the Direct Method in the setting of $\overline{u} \in W^{1,p}$. As with the previous sections, we will primarily follow Dacorogna \cite{dacorogna}, particularly Chapter 3, while also drawing on examples and notation from Rindler \cite{rindler}.
 
@@ -1831,7 +1845,7 @@ $$
 this implies that $\overline{u} =0$ in $(0,1)$. $\overline{u} \equiv 0$ is incompatible with boundary conditions. Thus $(P)$ has no solution.
 \end{example}
 
-\subsection{Euler--Lagrange Equations}
+\subsection{Euler--Lagrange Equation}
 
 We now extend the Euler--Lagrange Theorem~\ref{thm:Euler-Lagrange} in the setting of the Direct Method, motivated by the general existence theorem, Theorem~\ref{thm:General_existence_theorem}. This expensions allows for minimisers in the setting of $\overline{u} \in W^{1,p}(\Omega)$.
 
