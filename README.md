@@ -43,11 +43,11 @@ $$
 
 where:
 
-* \(\gamma\) is the path,
-* \(c(\gamma)\) is the terrain cost,
-* \(w_c\) controls the importance of terrain,
-* \(\lambda\) controls the curvature penalty,
-* \(\mu\) controls the length penalty.
+- $\gamma$ is the path,
+- $c(\gamma)$ is the terrain cost,
+- $w_c$ controls the importance of terrain,
+- $\lambda$ controls the curvature penalty,
+- $\mu$ controls the length penalty.
 
 The problem is considered over an appropriate Sobolev space, allowing the **Direct Method of the Calculus of Variations** to be used to establish the existence of a minimiser.
 
