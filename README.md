@@ -29,16 +29,7 @@ The resulting path learns to move around the hill while balancing terrain, curva
 The problem is formulated as a functional of the form
 
 $$
-J[\gamma]
-=
-\int
-\left(
-w_c\,c(\gamma(s))
-+
-\lambda |\gamma''(s)|^2
-+
-\mu
-\right)\,ds,
+J[\gamma] = \int \left( w_c\,c(\gamma(s)) + \lambda |\gamma''(s)|^2 + \mu \right)\,ds
 $$
 
 where:
