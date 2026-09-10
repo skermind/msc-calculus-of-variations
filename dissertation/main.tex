@@ -36,9 +36,86 @@
 
 \begin{document}
 
+
 \includepdf[pages=1]{chapters/title_page.pdf}
 
+\pagenumbering{roman}
+
+\chapter*{Executive Summary}
+\addcontentsline{toc}{chapter}{Executive Summary}
+
+\subsection*{The Problem}
+
+In this dissertation, we explore path planning problems where the aim is to minimise cost. The cost of a path is made up of three components: terrain costs (i.e. hills), its curvature, and its length. We build upon the classical Dido problem to investigate this more complicated problem. A good analogy is planning a railway route or motorway, where infrastructure needs to be short, relatively straight, and cost-effective.
+
+
+\subsection*{How the Issue Was Addressed}
+
+We start by applying the Classical Method of the Calculus of Variations. Immediately, we find that the Classical Method leads to a fourth-order ODE that we cannot solve explicitly. This motivates us to use the Direct Method of the Calculus of Variations, which provides an existence proof.
+
+With the confidence of knowing that a minimiser exists, we apply a numerical stochastic optimisation method called Simulated Annealing, modelled in Python. This algorithm uses randomness to search for an approximation to an optimum. We start with an initial straight-line path and apply small movements. If the new path has a lower cost, we accept the move.
+
+\subsection*{Interpretation of Findings}
+
+The existence proof is important, since it is not obvious that a minimising path exists. This dissertation also provides a high-level tutorial for learning how to use the Direct Method of the Calculus of Variations.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+    \noindent
+        We had to make a few changes to the Simulated Annealing algorithm in order for it to work as intended. By changing how and where we applied these small movements, we were able to obtain interesting results, showing a path that moves around the hill while still being constrained by curvature and length.
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{dissertation/figures/FullResults.png}
+        \caption{Final path obtained using simulated annealing.}
+        \label{fig:FullResults_EL}
+    \end{minipage}
+\end{figure}
+
+\subsection*{Recommendations and Future Work}
+
+While the current model serves as a proof of concept, some avenues for further work are:
+
+\begin{itemize}
+\item \textbf{Real-World Data:} Use OpenStreetMap data to investigate whether the algorithm works effectively with real-world terrain and infrastructure. It would be particularly interesting to compare the routes produced by the algorithm with existing railway lines.
+
+\item \textbf{Three-Dimensional Extension:} Increase the complexity of the terrain cost function to take elevation into account, for example when considering tunnels or bridges. This would also allow factors such as the gradient of the track to be incorporated.
+
+\item \textbf{Systematic Parameter Tuning:} The parameters used in the numerical experiments were chosen through experimentation. A more systematic approach to selecting these parameters could be developed.
+
+
+\end{itemize}
+
+
+\clearpage
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+First and foremost, I would like to thank my dissertation supervisor and Calculus of Variations lecturer, Dr. Yeasmin Sengul Tezel. Thank you for introducing me to such an interesting area of mathematics, and for your constant support, advice, and feedback throughout the project. I am extremely grateful for all your help.
+\\
+
+\noindent Secondly, I would like to thank my ever-supportive partner, Lydia Blunkett. It has been a tricky year balancing my workload with our personal lives, and I am incredibly grateful for the stability and reassurance you have provided. Thank you for letting me vent about having seemingly zero time, and for making me early-morning cups of coffee. I love you very much. Thank you.
+
+\clearpage
+
 \tableofcontents
+\addcontentsline{toc}{chapter}{Contents}
+
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{chapter}{List of Figures}
+\clearpage
+
+\listoftables
+\addcontentsline{toc}{chapter}{List of Tabels}
+
+\clearpage
+
+\pagenumbering{arabic}
 
 \chapter{Introduction}
 \input{dissertation/chapters/introduction}
